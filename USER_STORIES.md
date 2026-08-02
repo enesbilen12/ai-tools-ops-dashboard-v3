@@ -7,12 +7,15 @@ gereksinim (spec) referansı sağlamaktır.
 - **Hikaye formatı:** `Bir <rol> olarak, <istek> istiyorum ki <fayda>.`
 - **Kabul kriterleri:** Test edilebilir madde listesi (`- [ ]`).
 - **Roller:** _Kullanıcı_ (paneli kullanan kişi). Kimlik doğrulama/çok kullanıcı yoktur;
-  tüm veriler tarayıcıda `localStorage` içinde tutulur.
+  araçlar `db.json` içinde (json-server), tema ve favoriler tarayıcının
+  `localStorage`'ında tutulur.
 
 ## Veri Modeli
 
-Her araç (tool) aşağıdaki alanlara sahiptir. Sayısal `id` yoktur; **`name` benzersiz
-anahtardır** (harf duyarsız / case-insensitive).
+Her araç (tool) aşağıdaki alanlara sahiptir. Kayıt kimliği json-server'ın ürettiği
+`id` alanıdır; buna ek olarak **`name` de benzersiz olmak zorundadır** (harf duyarsız /
+case-insensitive) — favoriler bu ada göre saklanır. Ayrıca yumuşak silme için
+`deleted` (boolean) alanı vardır; ikisi de dışa aktarmaya dahil edilmez.
 
 | Alan | Açıklama | Kural |
 |------|----------|-------|
@@ -129,7 +132,7 @@ kullandıklarımı öne çıkarabileyim.
 
 ### Kabul Kriterleri
 - [ ] Her kartta favori durumunu değiştiren bir **yıldız butonu (☆ / ★)** bulunur.
-- [ ] Favoriler, `localStorage`'da **isim listesi** olarak saklanır (`favoriler` anahtarı).
+- [ ] Favoriler, `localStorage`'da **isim listesi** olarak saklanır (`ai-araclari-paneli:favoriler` anahtarı).
 - [ ] Özet kutusundaki **"Favoriler" sayacı** favori sayısını güncel gösterir.
 - [ ] Bir araç yeniden adlandırıldığında favori durumu **korunur** (yeni ada taşınır).
 - [ ] Bir araç silindiğinde favorilerden **çıkarılır**.
@@ -151,28 +154,37 @@ paneli göz konforuma göre kullanabileyim.
 
 ---
 
-## US-09 — JSON Dışa Aktarma
+## US-09 — CSV Dışa Aktarma
 
-**Bir kullanıcı olarak**, araç listemi JSON olarak görüntüleyebilmek istiyorum ki verimi
-kopyalayıp yedekleyebileyim veya başka yerde kullanabileyim.
+**Bir kullanıcı olarak**, araç listemi CSV dosyası olarak indirebilmek istiyorum ki
+verimi yedekleyebileyim veya bir tabloda açabileyim.
 
 ### Kabul Kriterleri
-- [ ] **"📤 JSON Dışa Aktar"** butonu bir **salt-okunur textarea** (`#export-cikti`) açıp/kapatır.
-- [ ] Textarea, mevcut **aktif araç listesini** `JSON.stringify(tools, null, 2)` ile **biçimlendirilmiş (pretty-print)** olarak gösterir.
-- [ ] Çıktı, kullanıcının kolayca **seçip kopyalamasına** olanak tanır.
-- [ ] (Not: mevcut davranış dosya indirme değil, **sayfa içi göster/gizle** şeklindedir.)
+- [ ] **"📤 CSV Dışa Aktar"** butonu bir `.csv` dosyası **indirir**.
+- [ ] Dosya yalnızca **aktif araçları** içerir (silinenler hariç).
+- [ ] Başlık satırı `CSV_COLUMNS` ile aynıdır; `id` ve `deleted` gibi **iç alanlar dışa aktarılmaz**.
+- [ ] Virgül, çift tırnak veya satır sonu içeren hücreler **RFC 4180**'e göre kaçırılır.
+
+> v3 değişikliği: v2'de bu özellik sayfa içi salt-okunur bir JSON textarea idi;
+> v3'te gerçek bir CSV dosya indirmesine dönüştü.
 
 ---
 
-## US-10 — Verilerin Kalıcılığı (localStorage)
+## US-10 — Verilerin Kalıcılığı (json-server + localStorage)
 
-**Bir kullanıcı olarak**, yaptığım değişikliklerin tarayıcıda saklanmasını istiyorum ki
+**Bir kullanıcı olarak**, yaptığım değişikliklerin saklanmasını istiyorum ki
 sayfayı kapatıp açtığımda verilerim kaybolmasın.
 
 ### Kabul Kriterleri
-- [ ] Aktif araçlar, silinen araçlar, favoriler ve tema ayrı `localStorage` anahtarlarında saklanır
-      (`ai-araclari-paneli:araclar`, `:silinenler`, `favoriler`, `:tema`).
-- [ ] İlk açılışta veri `data.json`'dan yüklenir; kayıtlı kullanıcı verisi varsa onunla **birleştirilir**.
-- [ ] Yeni eklenen varsayılan araçlar birleşmeye dahil edilir; silinmiş araçlar hariç tutulur.
-- [ ] Ekleme, düzenleme, silme, favori ve tema işlemleri her değişiklikte **anında kaydedilir**.
+- [ ] Araçlar `db.json` içinde **json-server** üzerinden tutulur; ekleme/düzenleme/silme
+      işlemleri REST çağrılarıyla (`POST` / `PATCH`) **anında kaydedilir**.
+- [ ] Silme **yumuşaktır**: kayıt `db.json`'da kalır, yalnızca `deleted: true` olur.
+- [ ] Yalnızca kullanıcıya özel UI tercihleri `localStorage`'da saklanır:
+      favoriler (`ai-araclari-paneli:favoriler`) ve tema (`ai-araclari-paneli:tema`).
+- [ ] json-server çalışmıyorsa boş ekran yerine sayfanın üstünde **anlaşılır bir hata
+      mesajı** gösterilir.
 - [ ] Tüm kullanıcı metni ekranda **güvenli biçimde (escape edilerek)** gösterilir (XSS koruması).
+
+> v3 değişikliği: v2'de araçlar ve çöp kutusu `localStorage`'daydı ve ilk açılışta
+> `data.json` ile birleştiriliyordu. v3'te tek kaynak `db.json` olduğu için o
+> birleştirme mantığı kalktı.
