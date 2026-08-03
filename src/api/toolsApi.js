@@ -3,19 +3,44 @@
 
 import { TOOLS_ENDPOINT } from '../constants.js';
 
-// Ortak yanıt kontrolü: ağ/HTTP hatasında anlamlı bir Error fırlat.
+// normalizeError: her başarısızlığı tek bir biçime sokar.
+//
+// Dönen Error'da mesajın yanında `status` ve `url` da taşınır; böylece çağıran
+// taraf 404 ile 500'ü ayırt edebilir (ör. 404'te listeyi tazelemek, 5xx'te
+// tekrar denemeyi önermek). Ağ hatası için status 0 kullanılır — HTTP yanıtı
+// hiç alınamadığı için gerçek bir durum kodu yoktur.
+export function normalizeError({ url = '', status = 0, cause } = {}) {
+  let mesaj;
+  if (status === 0) {
+    // Tipik sebep: json-server çalışmıyor (npm run api unutulmuş).
+    mesaj = "API'ye ulaşılamadı. json-server çalışıyor mu? (npm run api)";
+  } else if (status === 404) {
+    mesaj = 'Kayıt bulunamadı (404). Liste güncel olmayabilir, yenileyin.';
+  } else if (status >= 500) {
+    mesaj = `Sunucu hatası (HTTP ${status}). Birazdan tekrar deneyin.`;
+  } else if (status >= 400) {
+    mesaj = `İstek reddedildi (HTTP ${status}).`;
+  } else {
+    mesaj = `Beklenmeyen yanıt (HTTP ${status}).`;
+  }
+
+  const hata = new Error(mesaj);
+  hata.status = status;
+  hata.url = url;
+  if (cause) hata.cause = cause;
+  return hata;
+}
+
+// Ortak yanıt kontrolü: ağ/HTTP hatasında normalize edilmiş bir Error fırlat.
 async function istek(url, secenekler) {
   let yanit;
   try {
     yanit = await fetch(url, secenekler);
   } catch (hata) {
-    // Tipik sebep: json-server çalışmıyor (npm run api unutulmuş).
-    throw new Error(
-      'API\'ye ulaşılamadı. json-server çalışıyor mu? (npm run api)'
-    );
+    throw normalizeError({ url, status: 0, cause: hata });
   }
   if (!yanit.ok) {
-    throw new Error(`İstek başarısız (HTTP ${yanit.status})`);
+    throw normalizeError({ url, status: yanit.status });
   }
   // 204 gibi gövdesiz yanıtlarda json() patlamasın.
   if (yanit.status === 204) return null;
