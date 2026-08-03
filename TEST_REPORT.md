@@ -1,6 +1,6 @@
 # Test Raporu — v3
 
-Tarih: 2026-08-02 · Dal: `enes/week-3-v3-sprint`
+Son güncelleme: 2026-08-03 · Dal: `enes/week-3-v3-sprint`
 
 ## 1. Birim testleri (vitest)
 
@@ -13,7 +13,14 @@ npx vitest run
 | `tests/filters.test.js` | 7 | ✅ |
 | `tests/validators.test.js` | 6 | ✅ |
 | `tests/csv.test.js` | 5 | ✅ |
-| **Toplam** | **18** | **✅ 18/18** |
+| `tests/toolsApi.test.js` | 14 | ✅ |
+| **Toplam** | **32** | **✅ 32/32** |
+
+`toolsApi.test.js`, `globalThis.fetch`'i taklit eder — çalışan bir json-server
+gerektirmez. Kapsadığı: `normalizeError`'ın status 0 / 404 / 4xx / 5xx kolları,
+`status`+`url` alanlarının Error üzerinde taşınması, her uç noktanın adresi ve
+HTTP metodu, `softDeleteTool`'un `DELETE` değil `PATCH {deleted:true}` yollaması,
+`204` yanıtında `json()`'un hiç çağrılmaması.
 
 ## 2. Üretim derlemesi
 
@@ -22,7 +29,7 @@ npm run build
 ```
 
 ✅ Hatasız. 18 modül dönüştürüldü.
-Çıktı: `index.html` 0.61 kB · CSS 4.69 kB · JS 14.67 kB (gzip 4.89 kB).
+Çıktı: `index.html` 0.61 kB · CSS 5.05 kB · JS 15.84 kB (gzip 5.27 kB).
 
 ## 3. Entegrasyon dumanı testi (store + api, tarayıcısız)
 
@@ -46,6 +53,20 @@ dokunulmadı (koşu sonrası `diff` ile doğrulandı).
 | Abonelik | Her aksiyon aboneleri bilgilendirdi |
 | Hata yolu (R4) | `fetch` bozulduğunda `durum.error` "json-server çalışıyor mu?" mesajıyla doldu |
 
+## 3b. Yükleme / hata / retry akışı (Gün 2, tarayıcısız)
+
+Aynı yöntemle, Gün 2'de eklenen durumlar json-server'a karşı denendi.
+**17 kontrolün 17'si geçti.**
+
+| Senaryo | Doğrulanan |
+|---|---|
+| Başarılı yükleme | İlk bildirim `loading:true` + boş liste, son bildirim `loading:false` + 18 kayıt, hata yok |
+| Yükleme başarısız | `finally` çalıştı (`loading:false`), mesaj "npm run api" ipucunu içeriyor, liste boşaltıldı |
+| Boş durum ayrımı | Hata + boş liste → tablo "Tekrar dene" koşulunda; şerit aynı hatayı **tekrar etmiyor** |
+| `clearError` | Şerit kapatma düğmesinin çağırdığı aksiyon hatayı siliyor |
+| Retry | Sunucu geri gelince `loadTools()` 18 kaydı geri getirdi, hata temizlendi |
+| Aksiyon hatası | `addTool` `false` döndü, hata yazıldı, **liste korundu** (rollback gerekmedi), şerit koşulu sağlandı, tablo hata ekranına düşmedi |
+
 ## 4. Dev sunucusu
 
 `npm run api` + `npm run dev` birlikte ayağa kalktı.
@@ -64,6 +85,8 @@ gözle görülmedi:
 - CSV indirmesinin tarayıcıda gerçekten dosya olarak inmesi
 - Konsolun hatasız olduğu
 - Dar ekran (≤480px) yerleşimi
+- "Yükleniyor…", "Tekrar dene" butonu ve hata şeridinin kapatma (×) düğmesinin
+  ekranda göründüğü — mantıkları doğrulandı, çizimleri görülmedi
 
 Bu maddeler için `npm run api` + `npm run dev` çalıştırılıp
 `USER_STORIES.md`'deki US-01…US-10 kabul kriterleri elle geçilmelidir.

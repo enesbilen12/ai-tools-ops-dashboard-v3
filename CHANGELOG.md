@@ -1,5 +1,31 @@
 # Değişiklik Günlüğü
 
+## Yayınlanmamış — 2026-08-03
+
+Gün 2: API katmanının sertleştirilmesi ve yükleme/hata durumlarının ayrıştırılması.
+
+### Eklendi
+- **`normalizeError`** (`src/api/toolsApi.js`) — dışa aktarılmış, test edilebilir
+  hata normalleştirme. Fırlatılan `Error` artık `status` ve `url` da taşıyor;
+  ağ hatası (`status: 0`), 404, 4xx ve 5xx için ayrı mesajlar üretiliyor.
+- **`tests/toolsApi.test.js`** — 14 test; `fetch` taklidiyle çalışır, json-server
+  gerektirmez. Toplam test sayısı 18 → 32.
+- **`loading` durumu** (`src/state/store.js`) — `loadTools()` başında `true`,
+  `finally`'de `false`.
+- **"↻ Tekrar dene" butonu** — yükleme başarısız olduğunda tabloda görünür,
+  `loadTools()` çağırır. Kullanıcı artık sayfayı yenilemek zorunda değil.
+- **`API_CONTRACT.md`** — uç noktalar, kayıt şeması, yumuşak silme sözleşmesi,
+  hata biçimi ve `id`'nin metin olarak döndüğü uyarısı.
+- Hata şeridine **kapatma (×) düğmesi** (`clearError`).
+
+### Değişti
+- **Boş durum dörde ayrıldı.** Önceden dört ayrı durum tek bir "Araç bulunamadı."
+  mesajına iniyordu (yükleniyor / API kapalı / veri yok / filtre boş). Artık:
+  "Yükleniyor…", hata + Tekrar dene, "Henüz araç eklenmemiş.", "Araç bulunamadı."
+- Hata gösterimi ikiye bölündü: **yükleme** hatası tabloda retry ile,
+  **aksiyon** hatası üstteki kapatılabilir şeritte. Aynı mesaj iki yerde çıkmıyor.
+- Durum şeridi `:empty` yerine `hidden` özniteliğiyle gizleniyor (içine düğme girdi).
+
 ## v3.0.0 — 2026-08-02
 
 v2'nin (tek dosyalık, 887 satırlık `app.js`) modüler Vite yapısına taşınması.

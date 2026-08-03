@@ -13,10 +13,13 @@ Her modülün tek cümlelik sorumluluğu:
 - **`src/constants.js`** — Sabit değerleri tutar (kategoriler, abonelik/durum seçenekleri, API adresi, localStorage anahtarları).
 
 ### API Katmanı
-- **`src/api/toolsApi.js`** — `db.json` ile HTTP üzerinden konuşarak araçları okuma/ekleme/güncelleme/silme (CRUD) işlemlerini yapar.
+- **`src/api/toolsApi.js`** — `db.json` ile HTTP üzerinden konuşarak araçları okuma/ekleme/güncelleme/silme (CRUD) işlemlerini yapar; her başarısızlığı `normalizeError` ile `status` + `url` taşıyan tek bir hata biçimine sokar.
+
+> Uç noktalar, kayıt şeması, yumuşak silme sözleşmesi ve hata biçimi için:
+> **[`API_CONTRACT.md`](API_CONTRACT.md)**.
 
 ### Durum (State)
-- **`src/state/store.js`** — Uygulamanın tek doğruluk kaynağı olan durumu (araçlar, filtreler, favoriler, tema) tutar ve değişiklikte abone bileşenleri bilgilendirir.
+- **`src/state/store.js`** — Uygulamanın tek doğruluk kaynağı olan durumu (araçlar, filtreler, favoriler, tema, `loading`, `error`) tutar ve değişiklikte abone bileşenleri bilgilendirir.
 
 ### Bileşenler (Components)
 - **`src/components/dashboard.js`** — Diğer tüm bileşenleri bir araya getiren ana kapsayıcı; store'a abone olur ve genel yerleşimi çizer.
