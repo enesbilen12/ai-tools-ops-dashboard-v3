@@ -28,6 +28,8 @@ const durum = {
   theme: 'light',
   // Şu an kart içi düzenleme modunda olan aracın adı (yoksa null).
   editingName: null,
+  // İlk yükleme sürüyor mu? Boş liste ile "yükleniyor" ayırt edilebilsin diye.
+  loading: false,
   // Kullanıcıya gösterilecek son hata metni (json-server kapalıysa vb.).
   error: '',
 };
@@ -112,6 +114,12 @@ function temayiKaydet() {
 // kullanıcıya sebebi gösterilsin diye).
 export async function loadTools() {
   durum.favorites = favorileriYukle();
+  // Önce yükleniyor durumuna geç: aksi hâlde veri gelene kadar ekranda boş
+  // liste mesajı ("Araç bulunamadı.") görünür ve yanıltıcı olur.
+  durum.loading = true;
+  durum.error = '';
+  bildir();
+
   try {
     const gelen = await fetchTools();
     durum.tools = Array.isArray(gelen) ? gelen : [];
@@ -119,8 +127,10 @@ export async function loadTools() {
   } catch (hata) {
     durum.tools = [];
     durum.error = hata.message;
+  } finally {
+    durum.loading = false;
+    bildir();
   }
-  bildir();
 }
 
 // addTool: yeni araç ekler. Doğrulama bileşende yapılır; burada yalnızca
@@ -281,5 +291,14 @@ export function loadTheme() {
 export function toggleTheme() {
   applyTheme(durum.theme === 'dark' ? 'light' : 'dark');
   temayiKaydet();
+  bildir();
+}
+
+// --- HATA MESAJI ---
+
+// clearError: kullanıcı hata şeridini kapattığında çağrılır. Hata aksi hâlde
+// ancak sonraki başarılı işlemde silinirdi.
+export function clearError() {
+  durum.error = '';
   bildir();
 }
