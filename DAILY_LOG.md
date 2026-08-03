@@ -4,6 +4,63 @@ Her gün ne yaptığımı kısaca not aldığım dosya. En yeni gün en üstte.
 
 ---
 
+## Gün 2
+
+- **Tarih:** 2026-08-03
+- **Bugünkü hedef:** Mock REST API ve service katmanı.
+- **İzlediğim / okuduğum kaynaklar:**
+- **Yaptığım değişiklikler:** `toolsApi.js`'e `normalizeError` eklendi: ağ
+  hatası, 404, 4xx ve 5xx tek bir mesaj biçimine indirgeniyor ve dönen
+  `Error` üzerinde `status` + `url` taşınıyor (çağıran taraf 404 ile 500'ü
+  ayırt edebilsin diye). Ortak `istek()` sarmalayıcısı tüm çağrıları buradan
+  geçiriyor; 204 gibi gövdesiz yanıtlarda `json()` çağrılmıyor. Store'a
+  `loading` bayrağı eklendi; `loadTools` fetch'ten **önce** `loading: true`
+  ile bildirim yapıyor, `finally` bloğunda kapatıyor. `toolTable`'daki tek
+  "Araç bulunamadı." mesajı dörde ayrıldı: (1) Yükleniyor…, (2) hata +
+  "↻ Tekrar dene" butonu, (3) henüz araç eklenmemiş, (4) filtre sonucu boş.
+  Böylece kullanıcı "sunucu mu kapalı, filtrem mi tutmadı" ayrımını
+  yapabiliyor. Hata şeridi (`dashboard.js`) kapatılabilir hâle getirildi
+  (`clearError`) ve ilk yükleme hatasını artık tekrar etmiyor. `API_CONTRACT.md`
+  yazıldı: taban adres, kayıt şeması, uç noktalar ve hata biçimi. `index.html`
+  içindeki `#app` kabına statik "Yükleniyor…" iskeleti kondu — JS inene kadar
+  ekran beyaz kalmasın diye; `mountDashboard` ilk iş olarak üzerine yazıyor.
+- **Değişen dosyalar:** index.html, src/api/toolsApi.js, src/state/store.js,
+  src/components/{dashboard,toolTable}.js, src/styles/{base,components}.css,
+  tests/toolsApi.test.js (yeni), API_CONTRACT.md (yeni), ARCHITECTURE.md,
+  CHANGELOG.md, TEST_REPORT.md
+- **Claude Code'a verdiğim ana prompt:** "Sayfa açılırken 'Yükleniyor...' metni
+  görünmüyor. Network Slow 4G ile test ettim. toolTable.js'de loading state
+  neden ekranda gözükmüyor? Kod değiştirmeden önce nedeni açıkla."
+- **Test ettiklerim:** `npm test` (yeni `toolsApi` testleriyle birlikte);
+  `normalizeError`'ın status 0 / 404 / 4xx / 5xx kollarının ayrı mesaj
+  üretmesi; `fetchTools`/`createTool`/`updateTool`/`softDeleteTool`/
+  `restoreTool`'un doğru HTTP yöntemini ve gövdeyi göndermesi (GET / POST /
+  PATCH); 204 yanıtında `null` dönmesi; tarayıcıda Slow 4G ile ilk açılış
+  davranışı.
+- **Geçen testler:** `npm test` 32/32 geçti (4 dosya). Gün 1'deki 18 teste
+  `tests/toolsApi.test.js` ile 14 test eklendi.
+- **Kalan sorunlar:** Loading mesajının tarayıcıda gerçekten çizildiği,
+  breakpoint ile doğrulanmadı — Slow 4G'de Vite dev modülleri seri indiği için
+  metin ancak birkaç saniyelik beyaz ekranın ardından ve db.json 6.5 KB olduğu
+  için çok kısa süre görünüyor. Statik iskelet bu boşluğu kapatıyor ama koyu
+  tema kullanıcısında ilk kare açık zeminde çıkıyor (`loadTheme` de JS ile
+  çalışıyor).
+- **Bugün öğrendiğim kavram:** Hata normalizasyonu (`normalizeError`) — API
+  katmanının farklı başarısızlıkları tek bir sözleşmeye indirgemesi ve
+  `Error` üzerine ek alan (`status`, `url`, `cause`) iliştirmesi; HTTP
+  yöntemlerinin anlamı (GET okuma, POST oluşturma, PATCH kısmi güncelleme,
+  DELETE silme — burada gerçek DELETE yerine `deleted: true` ile PATCH
+  kullanılıyor); loading state ve "boş liste" ile "veri yolda"nın ayrı durumlar
+  olması.
+- **Yarın yapacağım iş:** Tam CRUD, form state ve detay drawer (Gün 3).
+- **Commit mesajları:** feat(api): normalize every request failure into one
+  error shape · feat(state): track loading and let errors be dismissed ·
+  feat(ui): split the empty state into four and add retry · feat(ui): show a
+  loading skeleton before the bundle lands · docs: document the API contract
+  and day 2 changes · docs: add day 2 daily log
+
+---
+
 ## Gün 1
 
 - **Tarih:** 2026-08-02
