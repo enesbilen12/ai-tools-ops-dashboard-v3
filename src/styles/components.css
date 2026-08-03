@@ -243,11 +243,24 @@ main {
   margin-top: 4px;
 }
 
-/* Sonuç bulunamadığında gösterilen mesaj: tüm genişliğe yayılır ve ortalanır. */
+/* Boş durum mesajı (yükleniyor / hata / veri yok / sonuç yok):
+   tüm genişliğe yayılır ve ortalanır. */
 .bos-sonuc {
   grid-column: 1 / -1; /* grid'in tüm sütunlarını kapla */
   text-align: center;
   color: var(--footer);
+}
+
+/* Yükleme başarısız olduğunda çıkan "Tekrar dene" butonu */
+.tekrar-btn {
+  cursor: pointer;
+  margin-top: 8px;
+  padding: 8px 14px;
+  font-size: 14px;
+  background-color: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
 }
 
 /* --- Sağ üst köşe: silinen araçlar menüsü --- */

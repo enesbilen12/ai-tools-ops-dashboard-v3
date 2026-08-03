@@ -15,6 +15,7 @@ import {
   isFavorite,
   toggleTheme,
   restoreTool,
+  clearError,
 } from '../state/store.js';
 import { mountFilters } from './filters.js';
 import { mountAddForm } from './toolForm.js';
@@ -41,10 +42,18 @@ export function mountDashboard(kok) {
   `;
   kok.appendChild(baslik);
 
-  // --- Durum şeridi (API hataları burada görünür) ---
-  const durumMesaji = document.createElement('p');
+  // --- Durum şeridi ---
+  // Yalnızca liste ekranda dururken oluşan aksiyon hatalarını gösterir
+  // (ekleme/silme başarısız oldu gibi). İlk yükleme hatası şeritte değil,
+  // tablonun içinde "Tekrar dene" butonuyla birlikte gösterilir.
+  const durumMesaji = document.createElement('div');
   durumMesaji.className = 'durum-mesaji';
   durumMesaji.setAttribute('role', 'status');
+  durumMesaji.hidden = true;
+  durumMesaji.innerHTML = `
+    <span class="durum-metin"></span>
+    <button class="durum-kapat" type="button" aria-label="Mesajı kapat">×</button>
+  `;
   kok.appendChild(durumMesaji);
 
   // --- Özet kutuları ---
@@ -83,7 +92,10 @@ export function mountDashboard(kok) {
   const ozetToplam = ozet.querySelector('#ozet-toplam');
   const ozetFavori = ozet.querySelector('#ozet-favori');
 
+  const durumMetni = durumMesaji.querySelector('.durum-metin');
+
   temaBtn.addEventListener('click', toggleTheme);
+  durumMesaji.querySelector('.durum-kapat').addEventListener('click', clearError);
 
   // Çöp menüsünü aç/kapa.
   silinenBtn.addEventListener('click', () => {
@@ -108,7 +120,12 @@ export function mountDashboard(kok) {
 
   function ciz(durum) {
     temaBtn.textContent = durum.theme === 'dark' ? '☀️ Açık tema' : '🌙 Koyu tema';
-    durumMesaji.textContent = durum.error;
+
+    // Liste boşken hata zaten tabloda "Tekrar dene" ile gösteriliyor; şeritte
+    // ikinci kez tekrar etmesin.
+    const seritHatasi = durum.error && durum.tools.length > 0 ? durum.error : '';
+    durumMetni.textContent = seritHatasi;
+    durumMesaji.hidden = !seritHatasi;
 
     const aktifler = activeTools();
     ozetToplam.textContent = aktifler.length;

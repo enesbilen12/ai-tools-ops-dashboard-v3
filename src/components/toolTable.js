@@ -16,6 +16,7 @@ import {
   setEditing,
   editTool,
   removeTool,
+  loadTools,
 } from '../state/store.js';
 import { editFormHtml, readEditForm, showEditError } from './toolForm.js';
 
@@ -82,6 +83,14 @@ export function mountToolTable(kap) {
 
   ana.addEventListener('click', async (olay) => {
     const hedef = olay.target;
+
+    // Yükleme başarısız olduğunda gösterilen "Tekrar dene" butonu; bir karta
+    // değil doğrudan ızgaraya bağlı olduğu için kart kontrolünden önce gelir.
+    if (hedef.closest('.tekrar-btn')) {
+      await loadTools();
+      return;
+    }
+
     const kart = hedef.closest('.kart');
     if (!kart) return;
     const arac = aracBul(kart);
@@ -124,10 +133,39 @@ export function mountToolTable(kap) {
 
   return {
     update(durum) {
-      const gosterilecek = filterTools(activeTools(), durum.filters);
       ana.innerHTML = '';
 
-      // Hiç sonuç yoksa bilgi mesajı göster (US-01).
+      // Dört ayrı boş durum. Hepsi tek bir "Araç bulunamadı."ya indirgenirse
+      // kullanıcı yükleniyor mu, sunucu mu kapalı, yoksa filtresi mi tutmadı
+      // ayırt edemez.
+
+      // 1) Veri yolda.
+      if (durum.loading) {
+        ana.innerHTML = '<p class="bos-sonuc">Yükleniyor…</p>';
+        return;
+      }
+
+      // 2) Yükleme başarısız: sebebi ve bir çıkış yolu göster.
+      if (durum.error && durum.tools.length === 0) {
+        ana.innerHTML = `
+          <div class="bos-sonuc">
+            <p>${escapeHtml(durum.error)}</p>
+            <button class="tekrar-btn" type="button">↻ Tekrar dene</button>
+          </div>
+        `;
+        return;
+      }
+
+      const aktifler = activeTools();
+
+      // 3) Bağlantı var ama ortada hiç araç yok (yeni/boş db.json).
+      if (aktifler.length === 0) {
+        ana.innerHTML = '<p class="bos-sonuc">Henüz araç eklenmemiş.</p>';
+        return;
+      }
+
+      // 4) Araç var ama filtre hiçbirini geçirmedi (US-01).
+      const gosterilecek = filterTools(aktifler, durum.filters);
       if (gosterilecek.length === 0) {
         ana.innerHTML = '<p class="bos-sonuc">Araç bulunamadı.</p>';
         return;

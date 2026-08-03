@@ -68,9 +68,13 @@ header p {
   margin: 4px 0;
 }
 
-/* Durum şeridi: json-server kapalıysa vb. sayfanın üstünde görünen mesaj.
-   Boşken (metin yoksa) hiç yer kaplamaması için :empty ile gizlenir. */
+/* Durum şeridi: bir işlem başarısız olduğunda sayfanın üstünde görünen mesaj.
+   Görünürlüğü JS'teki `hidden` özniteliğiyle yönetilir; display:flex tarayıcının
+   varsayılan [hidden] kuralını ezdiği için gizleme kuralı ayrıca yazılır. */
 .durum-mesaji {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   max-width: 900px;
   margin: 0 auto 16px;
   padding: 12px 16px;
@@ -81,6 +85,21 @@ header p {
   border-radius: 8px;
 }
 
-.durum-mesaji:empty {
+.durum-mesaji[hidden] {
   display: none;
+}
+
+.durum-metin {
+  flex: 1;
+}
+
+/* Şeridi kapatma düğmesi */
+.durum-kapat {
+  cursor: pointer;
+  padding: 0 6px;
+  font-size: 18px;
+  line-height: 1;
+  background: none;
+  color: var(--danger);
+  border: none;
 }
