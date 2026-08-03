@@ -8,8 +8,17 @@
     <title>AI Araçları Paneli</title>
   </head>
   <body>
-    <!-- dashboard bileşeni bu kabın içini doldurur. -->
-    <div id="app"></div>
+    <!-- dashboard bileşeni bu kabın içini doldurur.
+         İçindeki iskelet, JS inene kadar geçen sürede ekranın bomboş kalmaması
+         içindir; mountDashboard ilk işi olarak kabı temizleyip üzerine yazar.
+         Stil satır içi verilir: dev sunucusunda CSS de JS ile enjekte edildiği
+         için ilk boyamada .bos-sonuc kuralı henüz yüklenmiş olmaz. -->
+    <div id="app">
+      <p style="margin-top: 80px; font-family: Arial, Helvetica, sans-serif;
+                text-align: center; color: #777;">
+        Yükleniyor…
+      </p>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
