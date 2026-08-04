@@ -4,6 +4,69 @@ Her gün ne yaptığımı kısaca not aldığım dosya. En yeni gün en üstte.
 
 ---
 
+## Gün 3
+
+- **Tarih:** 2026-08-04
+- **Bugünkü hedef:** Tam CRUD, form state ve detay drawer.
+- **İzlediğim / okuduğum kaynaklar:**
+- **Yaptığım değişiklikler:** Ekleme ve düzenleme **tek formda** birleştirildi.
+  Önceden ekleme formu sayfanın üstünde, düzenleme formu kartın içindeydi ve
+  aynı 8 alan iki yerde tekrar ediyordu; artık üstteki form `durum.editingId`'ye
+  bakarak ekleme (POST) veya düzenleme (PATCH) modunda çalışıyor. Store'da
+  `editingName` yerine **`editingId`** tutuluyor — yeniden adlandırmada referans
+  ada bağlı kalmasın diye. Yazma isteği uçarken form/kart/çekmece butonlarını
+  kilitleyen **`saving`** bayrağı eklendi (çift tık ikinci istek üretmiyor).
+  Karta tıklayınca sağdan açılan salt-okunur **detay çekmecesi** (`toolDrawer.js`)
+  yazıldı: sekiz alan + kartta hiç görünmeyen `id` + favori durumu; `×`, karartma
+  ve `Esc` ile kapanıyor, odak geldiği karta dönüyor, klavyeyle de açılıyor.
+  Silmeden önceki `confirm()` kaldırıldı; yerine 5 saniyelik **geri alma toast'ı**
+  (`toast.js`) geldi. Geri alma yeni bir uç nokta getirmiyor, mevcut `restoreTool`'u
+  (`PATCH {deleted:false}`) çağırıyor; süre dolunca hiçbir şey yok edilmiyor, kayıt
+  çöp menüsünde duruyor. `removeTool` artık silinen kaydın favori olup olmadığını
+  hatırlıyor ve geri alma favoriyi de geri getiriyor. `CRUD_MATRIX.md` yazıldı.
+- **Değişen dosyalar:** src/state/store.js, src/utils/validators.js,
+  src/components/{toolForm,toolTable,dashboard}.js,
+  src/components/{toolDrawer,toast}.js (yeni),
+  src/styles/{components,responsive}.css, tests/validators.test.js,
+  CRUD_MATRIX.md (yeni), ARCHITECTURE.md, USER_STORIES.md, API_CONTRACT.md,
+  CHANGELOG.md, TEST_REPORT.md
+- **Claude Code'a verdiğim ana prompt:** "Gün 3 görevleri: Create/Edit modlarını
+  tek formda birleştir (editingId store'da) · POST ve PATCH akışlarını tamamla,
+  butonları istek sırasında disable et · Karta tıklayınca sağdan drawer açılsın ·
+  Silme sonrası 5 saniyelik undo toast ekle · CRUD_MATRIX.md oluştur, 12 manuel
+  senaryo listele. Önce mevcut durumu incele, plan ver, onayımı bekle."
+- **Test ettiklerim:** `npm test`; `npm run build`; store + json-server duman
+  testi (28 kontrol): `saving` dalgası, POST/PATCH akışları, `undo` kaydının
+  favoriyi hatırlaması, `undoDelete`'in kartı **ve** favoriyi geri getirmesi,
+  `clearUndo`'nun kaydı yok etmemesi, ad çakışmasında geri almanın engellenmesi,
+  silinen kaydın açık çekmecesinin/formunun kapanması.
+- **Geçen testler:** `npm test` **34/34** geçti (Gün 2'deki 32'ye iki regresyon
+  testi eklendi). Duman testi **28/28**. Tarayıcıda elle CRUD turu **12/12**
+  (`CRUD_MATRIX.md`). `npm run build` hatasız (20 modül, JS 19.39 kB / gzip 6.37 kB).
+- **Kalan sorunlar:** **Tarayıcı turu yapıldı: `CRUD_MATRIX.md`'deki 12 senaryonun
+  12'si de geçti** — çekmecenin açılışı, `Esc`/karartma ile kapanışı, odak dönüşü,
+  toast'ın 5 saniye sonra kendiliğinden kapanması ve butonların istek sırasında
+  kilitlenmesi gözle doğrulandı. Gün 1-2'den devreden görsel maddeler (CSV
+  indirmesi, konsolun temizliği, dar ekran yerleşimi, arama kutusu odağı) hâlâ
+  açık (`TEST_REPORT.md` §5). Ayrıca `npm run api` ilk yazmada `db.json`'ı kendi biçimine
+  çeviriyor (id'leri metne, `$schema` ekliyor); bu koşuda geri alındı ama her
+  API kullanımında tekrar edecek — bir kez kabul edip commit'lemek gerekebilir.
+- **Bugün öğrendiğim kavram:** Tek formun iki modda çalışması (create/edit) ve
+  modun **id** ile tutulması; yeniden çizimde girdiyi ezmemek için "yalnızca mod
+  değiştiğinde doldur" deseni; `saving` gibi bir uçuş bayrağıyla çift gönderimi
+  engelleme; yumuşak silme üzerine kurulu geri alma (undo) akışı ve toast
+  sayacının store'da değil bileşende durmasının nedeni (store yan etkisiz kalsın);
+  `role="dialog"` / `aria-modal` ve odak dönüşü gibi erişilebilirlik gerekleri.
+- **Yarın yapacağım iş:** Gün 4 (planlanacak).
+- **Commit mesajları:** fix(validators): compare ids as text so editing never
+  hits its own name · feat(state): track editing id, drawer, saving and undo ·
+  feat(ui): merge create and edit into one form, add drawer and undo toast ·
+  style: dress the drawer, toast and locked buttons · chore(data): accept
+  json-server's db.json format, add Mistral and Qwen · docs: document the day 3
+  CRUD flow · docs: add day 3 daily log
+
+---
+
 ## Gün 2
 
 - **Tarih:** 2026-08-03
