@@ -19,17 +19,23 @@ Her modülün tek cümlelik sorumluluğu:
 > **[`API_CONTRACT.md`](API_CONTRACT.md)**.
 
 ### Durum (State)
-- **`src/state/store.js`** — Uygulamanın tek doğruluk kaynağı olan durumu (araçlar, filtreler, favoriler, tema, `loading`, `error`) tutar ve değişiklikte abone bileşenleri bilgilendirir.
+- **`src/state/store.js`** — Uygulamanın tek doğruluk kaynağı olan durumu (araçlar, filtreler, favoriler, tema, `editingId`, `drawerId`, `loading`, `saving`, `undo`, `error`) tutar ve değişiklikte abone bileşenleri bilgilendirir.
 
 ### Bileşenler (Components)
 - **`src/components/dashboard.js`** — Diğer tüm bileşenleri bir araya getiren ana kapsayıcı; store'a abone olur ve genel yerleşimi çizer.
 - **`src/components/filters.js`** — Arama kutusu ile kategori ve durum filtrelerini çizer, kullanıcı girdisini store'a iletir.
-- **`src/components/toolTable.js`** — Filtrelenmiş araç listesini kart ızgarası olarak çizer, kart aksiyonlarını (favori, düzenle, sil, kaydet, iptal) olay delegasyonuyla yürütür.
-- **`src/components/toolForm.js`** — Hem üstteki araç ekleme formunu hem de kart içi (inline) düzenleme formunu üretir; girdiyi doğrular ve kaydetme isteğini store'a gönderir.
+- **`src/components/toolTable.js`** — Filtrelenmiş araç listesini kart ızgarası olarak çizer; kart aksiyonlarını (favori, düzenle, sil) ve kart gövdesine tıklamayı (detay çekmecesini açar) olay delegasyonuyla yürütür.
+- **`src/components/toolForm.js`** — **Tek** araç formunu üretir; `durum.editingId`'ye göre ekleme (POST) veya düzenleme (PATCH) modunda çalışır, girdiyi doğrular ve isteği store'a gönderir.
+- **`src/components/toolDrawer.js`** — Sağdan açılan salt-okunur detay çekmecesi; bir aracın tüm alanlarını (`id` dahil) gösterir ve favori/düzenle/sil kısayollarını sunar.
+- **`src/components/toast.js`** — Silme sonrası 5 saniyelik "geri al" şeridi; süre dolunca yalnızca kısayol biter, kayıt çöp menüsünde durmaya devam eder.
 
-> Ayrı bir yan çekmece (drawer) ve toast bileşeni yoktur: düzenleme kartın
-> kendi içinde açılır, onay/uyarı için `confirm()` ve `alert()` kullanılır,
-> API hataları ise `dashboard`'un üstündeki `.durum-mesaji` şeridinde görünür.
+> **Form tektir.** v3 Gün 3'e kadar ekleme formu sayfanın üstünde, düzenleme
+> formu kartın içindeydi; aynı 8 alan iki yerde tekrar ediyordu. Artık düzenleme
+> de üstteki formda açılır (`editingId`), kart içi form kaldırıldı.
+>
+> **Silmede `confirm()` yoktur.** Güvence, geri alınabilir toast'tır. Geri
+> yükleme çakışması gibi uyarılar `alert()` yerine toast/şerit üzerinden verilir;
+> API hataları `dashboard`'un üstündeki `.durum-mesaji` şeridinde görünür.
 
 ### Yardımcılar (Utils — saf fonksiyonlar)
 - **`src/utils/validators.js`** — Form alanlarını doğrular (zorunlu alanlar, benzersiz ad, `^https?://` url kuralı) ve hata mesajlarını üretir.
@@ -51,11 +57,11 @@ Component  (filters, toolForm, toolTable)
       │  • store aksiyonunu çağırır
       ▼
 Store  (state/store.js)
-      │  • durumu günceller (iyimser/optimistic olabilir)
+      │  • durumu günceller (iyimser/optimistic DEĞİL: istek dönmeden yazmaz)
       │  • kalıcılık için api'yi çağırır
       ▼
 API  (api/toolsApi.js)
-      │  • HTTP CRUD isteği (GET/POST/PUT/DELETE)
+      │  • HTTP CRUD isteği (GET/POST/PATCH — silme de PATCH'tir, DELETE yok)
       ▼
 db.json  (json-server)
       │  • kalıcı veri

@@ -1,5 +1,40 @@
 # Değişiklik Günlüğü
 
+## Yayınlanmamış — 2026-08-04
+
+Gün 3: tam CRUD, tek form ve geri alınabilir silme.
+
+### Eklendi
+- **Detay çekmecesi** (`src/components/toolDrawer.js`) — kart gövdesine tıklayınca
+  sağdan açılır; aracın sekiz alanı, kartta görünmeyen `id`'si ve favori durumu
+  burada. Salt-okunur; `×`, karartma ve `Esc` ile kapanır, odak geldiği karta döner.
+- **Geri alma toast'ı** (`src/components/toast.js`) — silmeden sonra 5 saniye
+  görünür. "Geri al" kaydı **ve favoriyi** geri getirir. Süre dolunca hiçbir şey
+  yok edilmez; kayıt çöp menüsünde durmaya devam eder.
+- **`saving` durumu** — yazma isteği uçarken form, kart ve çekmece butonları
+  kilitlenir; çift tık ikinci istek üretmez.
+- **`CRUD_MATRIX.md`** — tarayıcıda elle geçilecek 12 senaryo (C/R/U/D).
+- Store'a `editingId`, `drawerId`, `undo` alanları ve `openDrawer` / `closeDrawer` /
+  `undoDelete` / `clearUndo` / `findTool` aksiyonları.
+- **US-11** (`USER_STORIES.md`) — detay çekmecesi hikayesi ve kabul kriterleri.
+
+### Değişti
+- **Ekleme ve düzenleme tek formda birleşti.** Düzenleme formu kartın içinde
+  açılıyordu; aynı 8 alan iki yerde tekrar ediyordu. Artık sayfanın üstündeki tek
+  form `editingId`'ye göre POST veya PATCH yapıyor. `editFormHtml`, `readEditForm`
+  ve `showEditError` kaldırıldı.
+- **Silmede `confirm()` kaldırıldı.** Tek tık siler, güvence geri alma toast'ıdır.
+- Kartlar tıklanabilir ve odaklanabilir oldu (`tabindex`, `Enter`/`Space`).
+- Store'daki `editingName` → **`editingId`**: yeniden adlandırma sırasında referans
+  ada bağlı kalmasın diye.
+
+### Düzeltildi
+- **Düzenlemede "bu ad zaten var" kilidi.** `validateForm` benzersizlik kontrolünü
+  `t.id !== currentId` ile, yani katı karşılaştırmayla yapıyordu. `currentId` DOM'dan
+  metin (`"5"`), `db.json` id'leri sayı (`5`) geldiği için araç kendi adına çarpıyor
+  ve düzenleme kaydedilemiyordu. Karşılaştırma metin üzerinden yapılıyor; iki
+  regresyon testi eklendi (32 → 34).
+
 ## Yayınlanmamış — 2026-08-03
 
 Gün 2: API katmanının sertleştirilmesi ve yükleme/hata durumlarının ayrıştırılması.

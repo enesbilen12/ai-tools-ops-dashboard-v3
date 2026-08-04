@@ -99,13 +99,19 @@ listemi büyütebileyim.
 tutabileyim.
 
 ### Kabul Kriterleri
-- [ ] Her araç kartında **"✏️ Düzenle"** butonu bulunur.
-- [ ] Düzenle'ye tıklanınca o kart, **8 alanı da içeren satır içi (inline) düzenleme formuna** dönüşür.
+- [ ] Her araç kartında ve detay çekmecesinde **"✏️ Düzenle"** butonu bulunur.
+- [ ] Düzenle'ye tıklanınca **sayfanın üstündeki tek form** düzenleme moduna geçer:
+      başlık "✏️ Düzenle: <ad>" olur ve **8 alan da dolu** gelir.
 - [ ] Kaydetmede ekleme ile **aynı doğrulama kuralları** uygulanır; benzersizlik kontrolünde
-      aracın **kendi mevcut adı hariç** tutulur.
+      aracın **kendi mevcut kaydı (id)** hariç tutulur.
 - [ ] Araç adı (`name`) değiştirilirse, o araca ait **favori kaydı yeni ada taşınır** (kaybolmaz).
-- [ ] **"💾 Kaydet"** değişiklikleri uygular ve `localStorage`'a yazar.
-- [ ] **"İptal"** değişiklikleri atar ve kartı normal görünüme döndürür.
+- [ ] **"💾 Kaydet"** değişiklikleri `PATCH` ile kaydeder ve formu ekleme moduna döndürür.
+- [ ] **"İptal"** değişiklikleri atar ve formu ekleme moduna döndürür.
+- [ ] İstek sürerken kaydet/iptal ve kart butonları **kilitlenir**; çift tık ikinci istek üretmez.
+
+> v3 Gün 3 değişikliği: düzenleme formu kartın içinde açılıyordu (inline). Aynı 8 alan
+> iki ayrı yerde tekrar ettiği için ekleme ve düzenleme **tek formda** birleştirildi;
+> hangi kaydın düzenlendiği store'daki `editingId` ile tutulur.
 
 ---
 
@@ -115,13 +121,21 @@ tutabileyim.
 yükleyebilmek) istiyorum ki listemi güvenle düzenli tutabileyim.
 
 ### Kabul Kriterleri
-- [ ] Her kartta **"🗑 Sil"** butonu bulunur ve silmeden önce bir **onay (`confirm`) diyaloğu** gösterilir.
+- [ ] Her kartta ve detay çekmecesinde **"🗑 Sil"** butonu bulunur; silme **tek tıkla** olur.
+- [ ] Silmeden sonra **5 saniyelik geri alma toast'ı** gösterilir (`"<ad>" silindi.` + "↩︎ Geri al").
+- [ ] "Geri al" kaydı aktif listeye döndürür **ve silme anında favori idiyse favoriyi de geri getirir**.
+- [ ] Toast'ın süresi dolduğunda **hiçbir şey yok edilmez**; yalnızca kısayol biter,
+      kayıt çöp menüsünden hâlâ geri yüklenebilir.
 - [ ] Silinen araç aktif listeden çıkarılır ancak **çöp listesine (soft delete)** taşınır — kalıcı olarak yok edilmez.
 - [ ] Silinen araç varsa favorilerden de çıkarılır.
 - [ ] Üst kısımda **"🗑 Silinen Araçlar (N)"** menüsü silinen öğe sayısını ve listesini gösterir.
 - [ ] Silinen bir araca tıklanınca aktif listeye **geri yüklenir**.
 - [ ] Aynı ada sahip aktif bir araç varsa geri yükleme **engellenir**.
 - [ ] Silinen araçlar, sayfa yeniden yüklendiğinde varsayılan verilerden **tekrar geri gelmez**.
+
+> v3 Gün 3 değişikliği: silmeden önceki `confirm()` diyaloğu kaldırıldı. Onay sormak
+> yerine silme hemen uygulanır ve geri alınabilir bir toast gösterilir; silme zaten
+> yumuşak olduğu için kayıt hiçbir aşamada yok edilmez.
 
 ---
 
@@ -188,3 +202,20 @@ sayfayı kapatıp açtığımda verilerim kaybolmasın.
 > v3 değişikliği: v2'de araçlar ve çöp kutusu `localStorage`'daydı ve ilk açılışta
 > `data.json` ile birleştiriliyordu. v3'te tek kaynak `db.json` olduğu için o
 > birleştirme mantığı kalktı.
+
+---
+
+## US-11 — Araç Detayı (Çekmece) — *v3 Gün 3'te eklendi*
+
+**Bir kullanıcı olarak**, bir aracın tüm bilgilerini tek ekranda görebilmek istiyorum ki
+kartta kısaltılan alanları (tam not, tam adres, abonelik, kayıt kimliği) okuyabileyim.
+
+### Kabul Kriterleri
+- [ ] Kart gövdesine tıklamak (buton veya bağlantı dışında) sağdan **detay çekmecesini** açar.
+- [ ] Çekmecede aracın **sekiz alanı da** görünür; ayrıca kartta yer almayan **`id`** ve
+      favori durumu gösterilir. Boş alanlar `—` ile işaretlenir, satır atlanmaz.
+- [ ] Çekmece **salt-okunurdur**; düzenleme oradaki "✏️ Düzenle" ile üstteki forma devredilir.
+- [ ] Çekmece `×` düğmesi, arkadaki karartmaya tıklama ve **`Esc`** ile kapanır.
+- [ ] Kart klavyeyle de açılabilir (`Tab` ile odaklanır, `Enter`/`Space` açar); çekmece
+      kapanınca **odak geldiği karta döner**.
+- [ ] Tüm alanlar escape edilerek basılır (US-10 ile aynı XSS kuralı).

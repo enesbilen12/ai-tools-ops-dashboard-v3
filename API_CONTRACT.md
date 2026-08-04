@@ -10,7 +10,7 @@ konuştuğu uç noktaları, kayıt şemasını ve hata biçimini tanımlar.
 | Taban adres | `http://localhost:3001` (`API_BASE`, `src/constants.js`) |
 | Kaynak | `/tools` (`TOOLS_ENDPOINT`) |
 | Başlatma | `npm run api` → `json-server db.json --port 3001` |
-| Veri dosyası | `db.json` (kök dizinde, `{ "tools": [...] }`) |
+| Veri dosyası | `db.json` (kök dizinde, `{ "$schema": …, "tools": [...] }`) |
 
 Uygulama ve API **ayrı portlarda** çalışır (Vite `:5173`, API `:3001`).
 Her ikisinin de açık olması gerekir; API kapalıyken uygulama çökmez, ekranda
@@ -46,10 +46,21 @@ sebebini ve bir **"↻ Tekrar dene"** butonu gösterir.
 | `status` | string | — | `Aktif` / `Deneme` / `Pasif`; boşsa `Aktif` sayılır |
 | `deleted` | boolean | ✅ | Yumuşak silme işareti |
 
-> **Dikkat — `id` tipi.** `db.json` içinde sayı olarak duruyor (`1`), ama
-> json-server yanıtta **metin** döndürüyor (`"1"`). Bu yüzden kod hiçbir yerde
-> `===` ile ham karşılaştırma yapmaz; `store.js` ve `toolTable.js` içindeki
-> `aracBul` yardımcıları `String(a.id) === String(id)` kullanır.
+> **Dikkat — `id` tipi.** `id` her zaman **metindir** ve iki ayrı biçimde gelir:
+> `db.json`'daki ilk 18 kayıt sıra numarası taşır (`"1"`, `"2"`…), json-server'ın
+> yeni kayıtlara ürettikleri ise rastgele dizgilerdir (`"QAZwfVSgu9o"`). Sayısal
+> sıra beklenemez, `Number(id)` ile işlem yapılamaz.
+>
+> Kod hiçbir yerde `===` ile ham karşılaştırma yapmaz; tek kural
+> `String(a.id) === String(id)`'dir ve tek yerde durur: `store.js`'teki `aracBul`.
+> Bileşenler bunu tekrar yazmak yerine `findTool(id)` ile çağırır.
+> `utils/validators.js` de benzersizlik kontrolünde aynı metin karşılaştırmasını
+> kullanır — katı karşılaştırma, düzenlenen aracı kendi adına çarptırıyordu.
+>
+> **Not:** `db.json` bir kez `npm run api` ile yazıldığında json-server dosyayı
+> kendi biçimine çevirir: köke bir `$schema` anahtarı ekler ve sayısal id'leri
+> metne dönüştürür. Bu normalleştirme kabul edilmiştir; dosya bu hâliyle
+> depoda durur.
 
 ## Uç noktalar
 
@@ -106,6 +117,18 @@ patlamasın diye).
   alınacak bir şey kalmaz.
 - Hata store'da `durum.error`'a yazılır. Liste boşsa tabloda "Tekrar dene" ile,
   liste doluysa sayfa üstündeki kapatılabilir şeritte gösterilir.
+- **Tek uçuş kuralı.** Her yazma aksiyonu (`addTool` / `editTool` / `removeTool` /
+  `restoreTool`) isteğin önünde `durum.saving = true` yapıp `finally` içinde
+  kapatır. Form, kart ve çekmece butonları bu bayrağa bakarak kilitlenir; çift
+  tıklama ikinci bir istek üretmez.
+- **Geri alma yeni uç nokta getirmez.** Silme sonrası çıkan toast'ın "Geri al"
+  düğmesi `undoDelete()` üzerinden mevcut `restoreTool`'u — yani
+  `PATCH { deleted: false }` — çağırır. Toast'ın 5 saniyesi yalnızca kısayolun
+  süresidir: dolduğunda `clearUndo()` çalışır, **kayda dokunulmaz** ve çöp
+  menüsünden hâlâ geri yüklenebilir.
+- `removeTool`, silinen kaydın favori olup olmadığını `durum.undo.wasFavorite`
+  içinde saklar; geri alma favoriyi de geri koyar (aksi hâlde kart geri gelir,
+  favori sessizce kaybolurdu).
 
 ## Test
 
