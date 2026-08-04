@@ -1,7 +1,7 @@
 {
   "tools": [
     {
-      "id": 1,
+      "id": "1",
       "name": "ChatGPT",
       "category": "Metin",
       "purpose": "Soru yanıtlama ve metin üretme için sohbet tabanlı yapay zeka.",
@@ -13,7 +13,7 @@
       "deleted": false
     },
     {
-      "id": 2,
+      "id": "2",
       "name": "Claude",
       "category": "Metin",
       "purpose": "Uzun metinlerde ve kod yazımında güçlü sohbet asistanı.",
@@ -25,7 +25,7 @@
       "deleted": false
     },
     {
-      "id": 3,
+      "id": "3",
       "name": "Gemini",
       "category": "Metin",
       "purpose": "Google servisleriyle bütünleşik sohbet ve arama asistanı.",
@@ -37,7 +37,7 @@
       "deleted": false
     },
     {
-      "id": 4,
+      "id": "4",
       "name": "Midjourney",
       "category": "Görsel",
       "purpose": "Yazdığın açıklamadan sanatsal görseller üreten araç.",
@@ -49,7 +49,7 @@
       "deleted": false
     },
     {
-      "id": 5,
+      "id": "5",
       "name": "GitHub Copilot",
       "category": "Kod",
       "purpose": "Kod yazarken satır ve fonksiyon önerileri sunan asistan.",
@@ -61,7 +61,7 @@
       "deleted": false
     },
     {
-      "id": 6,
+      "id": "6",
       "name": "Canva",
       "category": "Tasarım",
       "purpose": "Sürükle-bırak ile afiş, sunum ve sosyal medya tasarımı.",
@@ -73,7 +73,7 @@
       "deleted": false
     },
     {
-      "id": 7,
+      "id": "7",
       "name": "Adobe Firefly",
       "category": "Görsel",
       "purpose": "Metin komutlarından görsel ve tasarım öğeleri üreten yapay zeka.",
@@ -85,7 +85,7 @@
       "deleted": false
     },
     {
-      "id": 8,
+      "id": "8",
       "name": "Leonardo.ai",
       "category": "Görsel",
       "purpose": "Oyun ve konsept sanatı için görsel üreten araç.",
@@ -97,7 +97,7 @@
       "deleted": false
     },
     {
-      "id": 9,
+      "id": "9",
       "name": "ElevenLabs",
       "category": "Ses/Müzik",
       "purpose": "Gerçekçi yapay ses ve seslendirme üreten araç.",
@@ -109,7 +109,7 @@
       "deleted": false
     },
     {
-      "id": 10,
+      "id": "10",
       "name": "Suno",
       "category": "Ses/Müzik",
       "purpose": "Metinden şarkı ve müzik üreten yapay zeka.",
@@ -121,7 +121,7 @@
       "deleted": false
     },
     {
-      "id": 11,
+      "id": "11",
       "name": "Runway",
       "category": "Video",
       "purpose": "Metin ve görselden video üreten/düzenleyen araç.",
@@ -133,7 +133,7 @@
       "deleted": false
     },
     {
-      "id": 12,
+      "id": "12",
       "name": "Pika",
       "category": "Video",
       "purpose": "Kısa videolar üreten ve görselleri canlandıran yapay zeka.",
@@ -145,7 +145,7 @@
       "deleted": false
     },
     {
-      "id": 13,
+      "id": "13",
       "name": "Notion AI",
       "category": "Verimlilik",
       "purpose": "Notlar ve belgeler için yazma/özetleme asistanı.",
@@ -157,7 +157,7 @@
       "deleted": false
     },
     {
-      "id": 14,
+      "id": "14",
       "name": "Otter.ai",
       "category": "Verimlilik",
       "purpose": "Toplantıları otomatik yazıya döken ve özetleyen araç.",
@@ -169,7 +169,7 @@
       "deleted": false
     },
     {
-      "id": 15,
+      "id": "15",
       "name": "Perplexity",
       "category": "Araştırma",
       "purpose": "Kaynak gösteren yapay zeka tabanlı arama asistanı.",
@@ -181,7 +181,7 @@
       "deleted": false
     },
     {
-      "id": 16,
+      "id": "16",
       "name": "NotebookLM",
       "category": "Araştırma",
       "purpose": "Yüklediğin belgelerden özet ve yanıt üreten araştırma aracı.",
@@ -193,7 +193,7 @@
       "deleted": false
     },
     {
-      "id": 17,
+      "id": "17",
       "name": "Cursor",
       "category": "Kod",
       "purpose": "Yapay zeka destekli kod editörü.",
@@ -205,7 +205,7 @@
       "deleted": false
     },
     {
-      "id": 18,
+      "id": "18",
       "name": "Replit",
       "category": "Kod",
       "purpose": "Tarayıcıda kod yazma ortamı ve yapay zeka asistanı.",
@@ -215,6 +215,31 @@
       "subscription": "Freemium",
       "status": "Aktif",
       "deleted": false
+    },
+    {
+      "name": "Mistral",
+      "category": "Metin",
+      "purpose": "Açık kaynaklı, hızlı ve verimli dil modeli",
+      "owner": "Mistral AI",
+      "note": "Avrupa merkezli, gizlilik odaklı",
+      "url": "https://mistral.ai",
+      "subscription": "Freemium",
+      "status": "Aktif",
+      "deleted": false,
+      "id": "QAZwfVSgu9o"
+    },
+    {
+      "name": "Qwen",
+      "category": "Metin",
+      "purpose": "Çok dilli ve kod odaklı açık kaynak dil modeli",
+      "owner": "Alibaba Cloud",
+      "note": "Türkçe dahil çok dil desteği var",
+      "url": "https://chat.qwen.ai",
+      "subscription": "Freemium",
+      "status": "Aktif",
+      "deleted": false,
+      "id": "BGYmQrcMwe0"
     }
-  ]
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
 }
