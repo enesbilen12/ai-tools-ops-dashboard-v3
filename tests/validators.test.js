@@ -37,6 +37,18 @@ describe('validateForm', () => {
     expect(hatalar.name).toBeUndefined();
   });
 
+  // currentId formdan/DOM'dan metin olarak gelir, db.json id'leri ise sayıdır.
+  // Katı karşılaştırma kullanılırsa araç kendi adına çarpar ve düzenleme kilitlenir.
+  it('currentId metin, id sayı olduğunda da aracın kendi adı hariç tutulur', () => {
+    const hatalar = validateForm({ ...gecerli, name: 'ChatGPT' }, mevcut, '1');
+    expect(hatalar.name).toBeUndefined();
+  });
+
+  it('başka bir aracın adı, currentId metin olsa da reddedilir', () => {
+    const hatalar = validateForm({ ...gecerli, name: 'Claude' }, mevcut, '1');
+    expect(hatalar.name).toBeDefined();
+  });
+
   it('http:// veya https:// ile başlamayan URL reddedilir', () => {
     expect(validateForm({ ...gecerli, url: 'ftp://x.co' }, mevcut).url).toBeDefined();
     expect(validateForm({ ...gecerli, url: 'ornek.com' }, mevcut).url).toBeDefined();

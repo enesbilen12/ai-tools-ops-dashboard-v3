@@ -3,7 +3,10 @@
 // data: { name, category, purpose, url, ... } girdileri.
 // existingTools: benzersizlik kontrolü için mevcut (aktif) araç listesi.
 // currentId: düzenlemede aracın KENDİ id'si; benzersizlik kontrolünden hariç tutulur.
-//            Eklemede null bırakılır.
+//            Eklemede null bırakılır. Karşılaştırma metin üzerinden yapılır:
+//            db.json'daki id'ler sayı, json-server'ın döndürdükleri ve DOM'dan
+//            (data-id) gelenler metindir; katı karşılaştırma aracı kendi adına
+//            çarptırırdı.
 //
 // Dönüş: hataların { alan: mesaj } nesnesi. Boş nesne => geçerli.
 export function validateForm(data, existingTools = [], currentId = null) {
@@ -14,7 +17,9 @@ export function validateForm(data, existingTools = [], currentId = null) {
     errors.name = 'Ad alanı zorunludur.';
   } else if (
     existingTools.some(
-      (t) => t.name.toLowerCase() === data.name.toLowerCase() && t.id !== currentId
+      (t) =>
+        t.name.toLowerCase() === data.name.toLowerCase() &&
+        (currentId == null || String(t.id) !== String(currentId))
     )
   ) {
     errors.name = `"${data.name}" adlı bir araç zaten var.`;
