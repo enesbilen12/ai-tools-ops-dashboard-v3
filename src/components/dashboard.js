@@ -18,8 +18,10 @@ import {
   clearError,
 } from '../state/store.js';
 import { mountFilters } from './filters.js';
-import { mountAddForm } from './toolForm.js';
+import { mountToolForm } from './toolForm.js';
 import { mountToolTable } from './toolTable.js';
+import { mountToolDrawer } from './toolDrawer.js';
+import { mountToast } from './toast.js';
 
 export function mountDashboard(kok) {
   kok.innerHTML = '';
@@ -67,7 +69,7 @@ export function mountDashboard(kok) {
 
   // --- Alt bileşenler (sıra v2 sayfa düzeniyle aynı) ---
   const filtreler = mountFilters(kok);
-  const ekleFormu = mountAddForm(kok);
+  const aracFormu = mountToolForm(kok);
 
   // --- Dışa aktarma ---
   const exportAlani = document.createElement('section');
@@ -77,6 +79,11 @@ export function mountDashboard(kok) {
   kok.appendChild(exportAlani);
 
   const tablo = mountToolTable(kok);
+
+  // Detay çekmecesi ve geri alma toast'ı: sayfa akışının dışında (sabit
+  // konumlu) durdukları için yerleşimde nerede olduklarının önemi yok.
+  const cekmece = mountToolDrawer(kok);
+  const toast = mountToast(kok);
 
   // --- Alt bilgi ---
   const altBilgi = document.createElement('footer');
@@ -137,14 +144,16 @@ export function mountDashboard(kok) {
       ? silinenler
           .map(
             (arac) =>
-              `<button class="silinen-oge" type="button" data-id="${escapeHtml(arac.id)}">↩︎ ${escapeHtml(arac.name)}</button>`
+              `<button class="silinen-oge" type="button" data-id="${escapeHtml(arac.id)}"${durum.saving ? ' disabled' : ''}>↩︎ ${escapeHtml(arac.name)}</button>`
           )
           .join('')
       : '<p class="silinen-bos">Silinen araç yok.</p>';
 
     filtreler.update(durum);
-    ekleFormu.update(durum);
+    aracFormu.update(durum);
     tablo.update(durum);
+    cekmece.update(durum);
+    toast.update(durum);
   }
 
   subscribe(ciz);
