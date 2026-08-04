@@ -26,10 +26,20 @@ const durum = {
   // adlandırmada favori kaydının yeni ada taşınması gerekir (renameFavorite).
   favorites: [],
   theme: 'light',
-  // Şu an kart içi düzenleme modunda olan aracın adı (yoksa null).
-  editingName: null,
+  // Formun düzenlediği aracın id'si (yoksa null = ekleme modu). Ad değil id
+  // tutulur: yeniden adlandırma sırasında referans kopmasın diye.
+  editingId: null,
+  // Detay çekmecesinde açık olan aracın id'si (kapalıysa null).
+  drawerId: null,
   // İlk yükleme sürüyor mu? Boş liste ile "yükleniyor" ayırt edilebilsin diye.
   loading: false,
+  // Bir yazma isteği (POST/PATCH) uçuyor mu? Butonlar buna bakarak kilitlenir;
+  // çift tıklama ikinci bir istek üretmesin.
+  saving: false,
+  // Son silinen kayıt: { id, name, wasFavorite }. Toast bunu gösterir, geri
+  // alma bunu kullanır. Süre dolunca yalnızca bu alan temizlenir — kayıt
+  // db.json'da `deleted: true` olarak durmaya devam eder.
+  undo: null,
   // Kullanıcıya gösterilecek son hata metni (json-server kapalıysa vb.).
   error: '',
 };
@@ -74,6 +84,12 @@ export function isFavorite(isim) {
 // (data-id) gelen değerler farklı tipte olabilir.
 function aracBul(id) {
   return durum.tools.find((arac) => String(arac.id) === String(id));
+}
+
+// findTool: aracBul'un dışa açık hâli. Bileşenler (form, çekmece, kart listesi)
+// id ile araç ararken bu kuralı tekrar yazmasın diye.
+export function findTool(id) {
+  return aracBul(id);
 }
 
 // --- localStorage (tema + favoriler) ---
@@ -136,16 +152,20 @@ export async function loadTools() {
 // addTool: yeni araç ekler. Doğrulama bileşende yapılır; burada yalnızca
 // kaydetme ve durum güncellemesi vardır. Başarıda true döner.
 export async function addTool(veri) {
+  durum.saving = true;
+  bildir();
+
   try {
     const olusan = await createTool({ ...veri, status: veri.status || DEFAULT_STATUS });
     durum.tools.push(olusan);
     durum.error = '';
-    bildir();
     return true;
   } catch (hata) {
     durum.error = hata.message;
-    bildir();
     return false;
+  } finally {
+    durum.saving = false;
+    bildir();
   }
 }
 
@@ -156,6 +176,9 @@ export async function editTool(id, veri) {
   if (!arac) return false;
 
   const eskiAd = arac.name;
+  durum.saving = true;
+  bildir();
+
   try {
     const guncel = await apiUpdateTool(id, {
       ...veri,
@@ -163,37 +186,53 @@ export async function editTool(id, veri) {
     });
     Object.assign(arac, guncel);
     if (eskiAd !== arac.name) renameFavorite(eskiAd, arac.name);
-    durum.editingName = null;
+    durum.editingId = null;
     durum.error = '';
-    bildir();
     return true;
   } catch (hata) {
     durum.error = hata.message;
-    bildir();
     return false;
+  } finally {
+    durum.saving = false;
+    bildir();
   }
 }
 
 // removeTool: yumuşak silme. Kayıt db.json'da kalır, `deleted: true` olur.
 // Hayalet favori kalmaması için favorilerden de çıkarılır (US-06).
+//
+// Silinen kaydın kimliği `durum.undo`'ya yazılır; toast bunu gösterir ve
+// `undoDelete` bunu kullanır. Favori olup olmadığı da saklanır: aksi hâlde
+// "Geri al" kartı geri getirir ama favoriyi sessizce kaybettirirdi.
 export async function removeTool(id) {
   const arac = aracBul(id);
   if (!arac) return false;
 
+  durum.saving = true;
+  bildir();
+
   try {
     await softDeleteTool(id);
     arac.deleted = true;
-    if (isFavorite(arac.name)) {
+
+    const favoriydi = isFavorite(arac.name);
+    if (favoriydi) {
       durum.favorites = durum.favorites.filter((ad) => ad !== arac.name);
       favorileriKaydet();
     }
+
+    durum.undo = { id: arac.id, name: arac.name, wasFavorite: favoriydi };
+    // Silinen kart düzenleniyorsa veya çekmecesi açıksa arkada kalmasın.
+    if (String(durum.editingId) === String(arac.id)) durum.editingId = null;
+    if (String(durum.drawerId) === String(arac.id)) durum.drawerId = null;
     durum.error = '';
-    bildir();
     return true;
   } catch (hata) {
     durum.error = hata.message;
-    bildir();
     return false;
+  } finally {
+    durum.saving = false;
+    bildir();
   }
 }
 
@@ -214,17 +253,52 @@ export async function restoreTool(id) {
     };
   }
 
+  durum.saving = true;
+  bildir();
+
   try {
     await apiRestoreTool(id);
     arac.deleted = false;
     durum.error = '';
-    bildir();
     return { ok: true };
   } catch (hata) {
     durum.error = hata.message;
-    bildir();
     return { ok: false, message: hata.message };
+  } finally {
+    durum.saving = false;
+    bildir();
   }
+}
+
+// undoDelete: toast'taki "Geri al". Kaydı geri yükler ve silmeden önce favori
+// ise favori kaydını da geri koyar. Geri yükleme kuralları restoreTool'da
+// olduğu gibi geçerlidir (aynı adlı aktif araç varsa engellenir).
+export async function undoDelete() {
+  const kayit = durum.undo;
+  if (!kayit) return { ok: false, message: 'Geri alınacak bir silme yok.' };
+
+  const sonuc = await restoreTool(kayit.id);
+  if (!sonuc.ok) return sonuc;
+
+  // Ad, geri yükleme sonrası kaydın kendi üzerinden okunur.
+  const ad = aracBul(kayit.id)?.name ?? kayit.name;
+  if (kayit.wasFavorite && !durum.favorites.includes(ad)) {
+    durum.favorites = [...durum.favorites, ad];
+    favorileriKaydet();
+  }
+
+  durum.undo = null;
+  bildir();
+  return { ok: true };
+}
+
+// clearUndo: toast süresi dolduğunda veya kapatıldığında çağrılır.
+// Hiçbir şeyi silmez — kayıt `deleted: true` olarak çöp menüsünde durmaya
+// devam eder, oradan hâlâ geri yüklenebilir.
+export function clearUndo() {
+  if (!durum.undo) return;
+  durum.undo = null;
+  bildir();
 }
 
 // --- AKSİYONLAR: favoriler ---
@@ -262,9 +336,22 @@ export function resetFilters() {
   bildir();
 }
 
-// setEditing: kartı form moduna alır (isim) veya form modundan çıkarır (null).
-export function setEditing(isim) {
-  durum.editingName = isim;
+// setEditing: formu düzenleme moduna alır (id) veya ekleme moduna döndürür (null).
+export function setEditing(id) {
+  durum.editingId = id ?? null;
+  bildir();
+}
+
+// --- AKSİYONLAR: detay çekmecesi (drawer) ---
+
+export function openDrawer(id) {
+  durum.drawerId = id ?? null;
+  bildir();
+}
+
+export function closeDrawer() {
+  if (durum.drawerId === null) return;
+  durum.drawerId = null;
   bildir();
 }
 
