@@ -9,4 +9,19 @@
   main {
     gap: 12px;
   }
+
+  /* Çekmece dar ekranda tam genişlik kaplar. */
+  .drawer {
+    width: 100%;
+    padding: 16px;
+  }
+
+  /* Toast kenarlara yapışır; ortalama yerine tam genişlik daha okunur. */
+  .toast {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    max-width: none;
+    transform: none;
+  }
 }

@@ -319,3 +319,184 @@ main {
   font-size: 13px;
   color: var(--muted);
 }
+
+/* --- Form başlığı: tek form iki modda çalıştığı için mod buradan okunur --- */
+.form-baslik {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+/* --- Tıklanabilir kart ---
+   Kart gövdesine tıklamak detay çekmecesini açar; bunun görsel ipucu. */
+.kart {
+  cursor: pointer;
+}
+
+.kart:hover {
+  border-color: #b0b0b0;
+}
+
+.kart:focus-visible {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+/* --- İstek sürerken kilitlenen butonlar ---
+   Tek kural tüm butonları kapsar; her bileşende tekrar yazılmasın. */
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* --- Detay çekmecesi (drawer) --- */
+
+/* Arkadaki karartma: çekmece açıkken sayfanın geri kalanını geri plana atar
+   ve tıklanınca çekmeceyi kapatır. */
+.drawer-perde {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 21; /* perdenin üstünde */
+  width: 420px;
+  max-width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  padding: 20px;
+  background-color: var(--card-bg);
+  color: var(--text);
+  border-left: 1px solid var(--border);
+}
+
+/* Başlık satırı: ad solda, kapatma düğmesi sağda */
+.drawer-ust {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.drawer-ust h2 {
+  flex: 1;
+  margin: 0;
+  font-size: 20px;
+}
+
+.drawer-kapat {
+  cursor: pointer;
+  padding: 0 6px;
+  font-size: 22px;
+  line-height: 1;
+  background: none;
+  color: var(--text);
+  border: none;
+}
+
+.drawer-rozetler {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 16px;
+}
+
+/* Alan listesi: etiket üstte soluk, değer altta */
+.drawer-alanlar {
+  margin: 0;
+}
+
+.drawer-satir {
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+
+.drawer-satir dt {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.drawer-satir dd {
+  margin: 2px 0 0;
+  font-size: 14px;
+  word-break: break-word; /* uzun URL çekmeceyi taşırmasın */
+}
+
+/* Değeri boş olan alan: çizgi ile gösterilir, satır atlanmaz */
+.drawer-bos {
+  color: var(--footer);
+}
+
+.drawer-aksiyonlar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.drawer-aksiyonlar button {
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 14px;
+  background-color: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.drawer-sil-btn {
+  color: var(--danger);
+}
+
+/* --- Geri alma toast'ı --- */
+
+/* Sayfanın altında ortalanmış şerit. Çekmecenin de üstünde durur ki
+   çekmeceden silindiğinde görünür kalsın. */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: calc(100% - 32px);
+  padding: 12px 16px;
+  font-size: 14px;
+  background-color: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+}
+
+.toast[hidden] {
+  display: none; /* display:flex tarayıcının [hidden] kuralını ezdiği için */
+}
+
+.toast-hata {
+  color: var(--danger);
+}
+
+.toast-geri-btn,
+.toast-kapat {
+  cursor: pointer;
+  padding: 6px 10px;
+  font-size: 14px;
+  background-color: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.toast-kapat {
+  padding: 6px 9px;
+  line-height: 1;
+}
