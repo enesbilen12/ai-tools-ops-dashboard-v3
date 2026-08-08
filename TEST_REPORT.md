@@ -1,6 +1,6 @@
 # Test Raporu — v3
 
-Son güncelleme: 2026-08-04 · Dal: `enes/week-3-v3-sprint`
+Son güncelleme: 2026-08-08 · Dal: `enes/week-3-v3-sprint`
 
 ## 1. Birim testleri (vitest)
 
@@ -14,11 +14,22 @@ npx vitest run
 | `tests/validators.test.js` | 8 | ✅ |
 | `tests/csv.test.js` | 5 | ✅ |
 | `tests/toolsApi.test.js` | 14 | ✅ |
-| **Toplam** | **34** | **✅ 34/34** |
+| `tests/sorting.test.js` | 11 | ✅ |
+| `tests/pagination.test.js` | 18 | ✅ |
+| `tests/urlState.test.js` | 12 | ✅ |
+| `tests/debounce.test.js` | 4 | ✅ |
+| **Toplam** | **79** | **✅ 79/79** |
 
 Gün 3'te `validators.test.js`'e iki regresyon testi eklendi: benzersizlik kontrolünde
 `currentId` metin (`"1"`), kayıt id'si sayı (`1`) geldiğinde aracın kendi adının hariç
 tutulması ve başka bir aracın adının yine de reddedilmesi.
+
+Gün 4'te dört yeni saf modül test edildi (34 → 79). Öne çıkanlar: sıralamada **Türkçe
+harf sırası** (`Analiz · Çizim · İzleme · Şema · Zoom`), girdi dizisinin
+değiştirilmediği, sayfa numarasının taşan/negatif/sayı-olmayan değerlerde sınırlanması,
+URL'in gidiş-dönüşte (state → params → state) durumu koruması ve bozuk sorgunun
+(`?page=abc&sort=xyz&status=Uydurma`) varsayılana düşmesi. `debounce` testleri
+`vi.useFakeTimers()` ile çalışır.
 
 `toolsApi.test.js`, `globalThis.fetch`'i taklit eder — çalışan bir json-server
 gerektirmez. Kapsadığı: `normalizeError`'ın status 0 / 404 / 4xx / 5xx kolları,
@@ -32,8 +43,8 @@ HTTP metodu, `softDeleteTool`'un `DELETE` değil `PATCH {deleted:true}` yollamas
 npm run build
 ```
 
-✅ Hatasız. 20 modül dönüştürüldü.
-Çıktı: `index.html` 1.11 kB · CSS 7.08 kB · JS 19.39 kB (gzip 6.37 kB).
+✅ Hatasız. 25 modül dönüştürüldü.
+Çıktı: `index.html` 1.11 kB · CSS 7.49 kB · JS 23.44 kB (gzip 7.71 kB).
 
 ## 3. Entegrasyon dumanı testi (store + api, tarayıcısız)
 
@@ -89,6 +100,24 @@ hâli korundu (`git checkout db.json` ile doğrulandı).
 | Çekmece durumu | `openDrawer` / `closeDrawer` `drawerId`'yi doğru yazdı |
 | Silinen kaydın açık ekranları | Silinen araç düzenleniyorsa/çekmecesi açıksa `editingId` ve `drawerId` sıfırlandı |
 
+## 3d. Sıralama / sayfalama / URL akışı (Gün 4, tarayıcısız)
+
+Aynı yöntemle, çalışan json-server'a karşı. **29 kontrolün 29'u geçti.**
+Koşu sonunda silinen kayıtlar geri yüklendi; `db.json` 20 kayıtlık hâliyle korundu.
+
+| Senaryo | Doğrulanan |
+|---|---|
+| Varsayılan durum | `sort='name-asc'`, `page=1`, `pageSize=12` |
+| URL → store | Beş alan da uygulandı; **veri gelmeden sayfa sıfırlanmadı** |
+| Veri gelince kırpma | `?page=2` ile açılan dar filtrede sayfa 1'e indi |
+| Sıralama | A→Z ile Z→A birbirinin tersi; `durum.tools` sırası **bozulmadı** |
+| Sayfalama | 2. sayfaya geçiş; taşan sayfa son sayfaya, negatif sayfa 1'e sıkıştı |
+| Sayfa sıfırlama | `setFilter`, `setSort`, `resetFilters` sonrası `page=1` |
+| Gereksiz sıfırlama yok | Aynı değeri yeniden atamak sayfayı korudu |
+| store → URL | Varsayılan görünümde sorgu boş; `q`/`page` yazıldı, varsayılanlar yazılmadı |
+| Tek sayfalık sonuç | `setPage(2)` 1'e sıkıştı, URL'e `page` girmedi |
+| Son karttaki silme | Sayfa bir öncekine düştü, hiçbir zaman 0/negatif olmadı |
+
 ## 4. Dev sunucusu
 
 `npm run api` + `npm run dev` birlikte ayağa kalktı.
@@ -116,5 +145,11 @@ kod/headless katmanda doğrulandı:
 - "Yükleniyor…", "Tekrar dene" butonu ve hata şeridinin kapatma (×) düğmesinin
   ekranda göründüğü — mantıkları doğrulandı, çizimleri görülmedi
 
+**Gün 4 arayüzü de gözle görülmedi:** arama debounce'ının kutuyu dondurmadığı,
+sıralama menüsünün ekranda doğru sıraladığı, sayfalama çubuğunun görünürlüğü ve
+buton kilitleri, sayfa değişiminde ızgaranın başına kaydırma, adres çubuğunun
+gerçekten güncellendiği ve yenilemede görünümün geri geldiği — mantıkları
+`§3d`'de doğrulandı, çizimleri görülmedi.
+
 Bu maddeler için `npm run api` + `npm run dev` çalıştırılıp
-`USER_STORIES.md`'deki US-01…US-11 kabul kriterleri elle geçilmelidir.
+`USER_STORIES.md`'deki US-01…US-14 kabul kriterleri elle geçilmelidir.

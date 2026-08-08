@@ -36,12 +36,15 @@ case-insensitive) — favoriler bu ada göre saklanır. Ayrıca yumuşak silme i
 listede hızlıca bulabileyim.
 
 ### Kabul Kriterleri
-- [ ] Arama kutusuna (`#arama`) yazdıkça liste **anlık** (her tuş vuruşunda) filtrelenir.
+- [ ] Arama kutusuna (`#arama`) yazdıkça liste filtrelenir; güncelleme yazma
+      durakladıktan **300 ms** sonra yapılır (her tuş vuruşunda değil), kutu bu sırada
+      donmaz ve odağını kaybetmez.
 - [ ] Arama `name`, `category` ve `purpose` alanlarında eşleşme arar (`owner` ve `note` dahil değildir).
 - [ ] Arama **büyük/küçük harf duyarsızdır**.
 - [ ] Arama, kategori ve durum filtreleriyle **VE (AND)** mantığıyla birlikte çalışır.
 - [ ] Arama kutusu boşaltıldığında (diğer filtreler nötrse) tüm araçlar yeniden görünür.
 - [ ] Hiçbir sonuç yoksa kullanıcıya boş/uygun bir durum gösterilir.
+- [ ] Arama metni adres çubuğuna (`?q=`) yansır ve sayfa yenilenince geri gelir (US-14).
 
 ---
 
@@ -219,3 +222,56 @@ kartta kısaltılan alanları (tam not, tam adres, abonelik, kayıt kimliği) ok
 - [ ] Kart klavyeyle de açılabilir (`Tab` ile odaklanır, `Enter`/`Space` açar); çekmece
       kapanınca **odak geldiği karta döner**.
 - [ ] Tüm alanlar escape edilerek basılır (US-10 ile aynı XSS kuralı).
+
+---
+
+## US-12 — Sıralama — *v3 Gün 4'te eklendi*
+
+**Bir kullanıcı olarak**, listeyi farklı ölçütlere göre sıralayabilmek istiyorum ki
+aradığımı öngörülebilir bir düzende bulabileyim.
+
+### Kabul Kriterleri
+- [ ] Filtre alanında bir **sıralama menüsü** bulunur: Ad (A→Z), Ad (Z→A),
+      Kategori (A→Z), Durum (A→Z).
+- [ ] Varsayılan sıralama **Ad (A→Z)**'dir.
+- [ ] Sıralama **Türkçe harf sırasına** uyar: `Çizim` C ile Z arasında, `Şema` S ile T
+      arasında, `İzleme` I ile J arasında yer alır.
+- [ ] `status` alanı boş olan araçlar duruma göre sıralamada **`Aktif`** sayılır (US-03 ile aynı kural).
+- [ ] Kategori/durum sıralamasında eşit kayıtlar **ada göre** ikincil sıralanır; sıra
+      çizimden çizime oynamaz.
+- [ ] Sıralama değişince liste **1. sayfaya** döner.
+- [ ] Sıralama, filtrelerden bağımsızdır: ikisi birlikte uygulanır.
+
+---
+
+## US-13 — Sayfalama — *v3 Gün 4'te eklendi*
+
+**Bir kullanıcı olarak**, uzun listeyi sayfalara bölünmüş görmek istiyorum ki tek
+ekranda yüzlerce kartla boğuşmayayım.
+
+### Kabul Kriterleri
+- [ ] Izgarada sayfa başına **12 kart** gösterilir.
+- [ ] Izgaranın altında **← Önceki · Sayfa N / M · X araç · Sonraki →** çubuğu bulunur.
+- [ ] Sonuç tek sayfaya sığıyorsa çubuk **hiç görünmez**.
+- [ ] İlk sayfada "Önceki", son sayfada "Sonraki" **kilitlidir**; bir istek uçarken ikisi de kilitlenir.
+- [ ] Sayfa değişince ızgaranın başına kaydırılır.
+- [ ] **Filtre veya sıralama değişince sayfa 1'e döner.**
+- [ ] Son sayfadaki son kart silinince boş ızgara değil, **bir önceki sayfa** gösterilir.
+- [ ] Sayfa numarası hiçbir koşulda 1'in altına veya son sayfanın üstüne çıkmaz.
+
+---
+
+## US-14 — Görünümün Adres Çubuğunda Saklanması — *v3 Gün 4'te eklendi*
+
+**Bir kullanıcı olarak**, filtrelediğim görünümün adres çubuğuna yansımasını istiyorum ki
+bağlantıyı paylaşabileyim ve sayfayı yenilediğimde aramamı kaybetmeyeyim.
+
+### Kabul Kriterleri
+- [ ] Arama, kategori, durum, sıralama ve sayfa adres çubuğuna yazılır:
+      `?q=…&category=…&status=…&sort=…&page=…`
+- [ ] **Varsayılan görünümde hiç sorgu parametresi yazılmaz** (adres temiz kalır).
+- [ ] Sayfa yenilendiğinde aynı görünüm geri yüklenir; liste ilk çizimde doğru filtreyle gelir.
+- [ ] Adres `replaceState` ile güncellenir; her tuş vuruşu tarayıcı geçmişine **adım eklemez**.
+- [ ] Elle bozulmuş URL (`?page=abc&sort=xyz&status=Uydurma`) uygulamayı kırmaz; tanınmayan
+      değerler sessizce varsayılana düşer.
+- [ ] URL'den gelen kategori, veri yüklenene kadar korunur (liste boşken `all`'a düşmez).

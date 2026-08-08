@@ -4,6 +4,77 @@ Her gün ne yaptığımı kısaca not aldığım dosya. En yeni gün en üstte.
 
 ---
 
+## Gün 4
+
+- **Tarih:** 2026-08-08
+- **Bugünkü hedef:** Sıralama, sayfalama ve adres çubuğunda saklanan görünüm.
+- **İzlediğim / okuduğum kaynaklar:**
+- **Yaptığım değişiklikler:** Önce saf fonksiyonlar yazıldı, sonra arayüze
+  bağlandı. `utils/sorting.js`: dört sıralama seçeneği (Ad A→Z / Z→A, Kategori,
+  Durum) ve **Türkçe harf sırası** (`localeCompare(…, 'tr')`) — varsayılan
+  sıralamada `Çizim`/`Şema`/`İzleme` yanlış yere düşüyordu. Girdi dizisi
+  değiştirilmiyor: `durum.tools` yerinde sıralansaydı çöp menüsünün ve CSV'nin
+  sırası da sessizce değişirdi. `utils/pagination.js`: sayfa sayısı, sayfa
+  numarasını geçerli aralığa sıkıştırma ve dilimleme. `utils/urlState.js`:
+  görünüm ile `URLSearchParams` arasında iki yönlü çeviri; varsayılan değerler
+  URL'e yazılmıyor, dışarıdan gelenler doğrulanıyor. `utils/debounce.js`: arama
+  kutusu 300 ms bekliyor. Store'a `sort`, `page`, `pageSize` alanları,
+  `setSort`/`setPage`/`applyUrlState` aksiyonları ve `visibleTools()` eklendi;
+  filtre ve sıralama değişince sayfa 1'e dönüyor, silme ve yükleme sonrası
+  sayfa kırpılıyor. Izgaranın altına sayfalama çubuğu (`components/pagination.js`)
+  geldi. `main.js` açılışta URL'i okuyup ilk çizimden önce uyguluyor, sonrasında
+  `replaceState` ile yalnızca sorgu gerçekten değiştiğinde yazıyor.
+  `STATE_DIAGRAM.md` yazıldı.
+- **Değişen dosyalar:** src/main.js, src/state/store.js,
+  src/components/{filters,toolTable,dashboard}.js,
+  src/components/pagination.js (yeni),
+  src/utils/{sorting,pagination,urlState,debounce}.js (yeni),
+  src/styles/components.css,
+  tests/{sorting,pagination,urlState,debounce}.test.js (yeni),
+  STATE_DIAGRAM.md (yeni), ARCHITECTURE.md, USER_STORIES.md, CHANGELOG.md,
+  TEST_REPORT.md
+- **Claude Code'a verdiğim ana prompt:** "Gün 4 görevleri: Store state şemasını
+  genişlet (query, filters, sort, page, pageSize) · sortTools ve paginateTools
+  saf fonksiyonlarını yaz, testlerini ekle · arama debounce (300ms), sıralama
+  dropdown, sayfalama kontrolleri · filtre sonrası sayfa 1'e dönsün ·
+  URLSearchParams ile arama/filtre/sayfa adres çubuğuna yansısın, yenileyince
+  geri yüklensin · STATE_DIAGRAM.md oluştur. Önce mevcut durumu incele, plan ver,
+  onayımı bekle."
+- **Test ettiklerim:** `npm test` (dört yeni modülün birim testleri);
+  `npm run build`; store + json-server duman testi (29 kontrol): URL'den okunan
+  görünümün uygulanması, veri gelince taşan sayfanın kırpılması, sıralamanın
+  `durum.tools`'u bozmaması, sayfa sınırları, filtre/sıralama sonrası sayfanın
+  1'e dönmesi, aynı değeri yeniden atamanın sayfayı sıfırlamaması, store → URL
+  yazımında varsayılanların atlanması, son sayfadaki son kart silininceki geri
+  çekilme.
+- **Geçen testler:** `npm test` **79/79** (Gün 3'teki 34'e 45 test eklendi).
+  Duman testi **29/29**. `npm run build` hatasız (25 modül, JS 23.44 kB /
+  gzip 7.71 kB). `db.json` 20 kayıtlık hâliyle korundu.
+- **Kalan sorunlar:** **Gün 4'ün arayüzü tarayıcıda görülmedi** — debounce'ın
+  kutuyu dondurmadığı, sıralama menüsünün ekranda doğru sıraladığı, sayfalama
+  çubuğunun görünürlüğü/kilitleri ve adres çubuğunun gerçekten güncellenip
+  yenilemede geri geldiği yalnızca mantık düzeyinde doğrulandı
+  (`TEST_REPORT.md` §5). Gün 1-2'den devreden görsel maddeler (CSV indirmesi,
+  konsolun temizliği, dar ekran yerleşimi) hâlâ açık. Ayrıca tarayıcının geri
+  tuşu (`popstate`) dinlenmiyor: adres değişse de panel tepki vermiyor —
+  bilinçli olarak kapsam dışı bırakıldı (`STATE_DIAGRAM.md` §5).
+- **Bugün öğrendiğim kavram:** Türetilmiş durum (derived state) — `sort`/`page`
+  gibi alanların listeyi değil, listenin **görüntüsünü** tarif etmesi ve zincirin
+  (`filter → sort → paginate`) her adımının saf kalması; debounce ve bunun
+  denetimli girdi (controlled input) ile çakışması (bekleyen çağrı varken kutuya
+  geri yazmama); `replaceState` ile `pushState` farkı ve neden filtre
+  değişikliklerinin geçmişe eklenmemesi gerektiği; `localeCompare` ile yerelleşmiş
+  sıralama; dışarıdan gelen her değerin (URL) doğrulanması gerektiği.
+- **Yarın yapacağım iş:** Gün 5 (planlanacak).
+- **Commit mesajları:** feat(utils): add sorting with Turkish collation ·
+  feat(utils): add pagination helpers · feat(utils): add url state translation
+  and debounce · feat(state): track sort, page and url-restored view ·
+  feat(ui): add sort menu, debounced search and pagination bar ·
+  feat(app): sync the view with the address bar · docs: document day 4 state,
+  sorting and pagination
+
+---
+
 ## Gün 3
 
 - **Tarih:** 2026-08-04

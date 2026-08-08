@@ -1,5 +1,41 @@
 # Değişiklik Günlüğü
 
+## Yayınlanmamış — 2026-08-08
+
+Gün 4: sıralama, sayfalama ve adres çubuğunda saklanan görünüm.
+
+### Eklendi
+- **Sıralama menüsü** — Ad (A→Z / Z→A), Kategori, Durum. Karşılaştırmalar Türkçe
+  harf sırasına göre (`localeCompare(…, 'tr')`); aksi hâlde `Çizim`/`Şema`/`İzleme`
+  yanlış yere düşüyordu. Eşit kayıtlar ada göre ikincil sıralanır.
+- **Sayfalama** — sayfa başına 12 kart, ızgaranın altında
+  `← Önceki · Sayfa N / M · X araç · Sonraki →` çubuğu. Tek sayfaya sığan listede
+  çubuk hiç görünmez.
+- **Adres çubuğu senkronu** — arama, kategori, durum, sıralama ve sayfa
+  `?q=…&category=…&status=…&sort=…&page=…` olarak yazılır; sayfa yenilenince görünüm
+  geri yüklenir. Varsayılan değerler yazılmaz, adres temiz kalır. Yazma
+  `replaceState` ile: filtre değişiklikleri tarayıcı geçmişini doldurmaz.
+- **Arama debounce'ı (300 ms)** — her tuş vuruşunda tüm ızgara yeniden çiziliyordu.
+- Yeni saf modüller: `utils/sorting.js`, `utils/pagination.js`, `utils/urlState.js`,
+  `utils/debounce.js` — dördü de test edildi (34 → 79 test).
+- Store'a `sort`, `page`, `pageSize` alanları; `setSort`, `setPage`, `applyUrlState`
+  aksiyonları ve `visibleTools()` okuma yardımcısı.
+- **`STATE_DIAGRAM.md`** — durum alanları tablosu, listenin dönüşüm zinciri, sayfa
+  sıfırlama kuralları ve URL senkronunun iki yönü.
+- **US-12 / US-13 / US-14** (`USER_STORIES.md`) — sıralama, sayfalama, URL kalıcılığı.
+
+### Değişti
+- `setFilter` / `resetFilters` / `setSort` sayfayı **1'e döndürür**; daralan sonuçta
+  kullanıcı liste dışı bir sayfada kalmasın.
+- `setFilter` aynı değer yeniden atandığında hiçbir şey yapmaz — gereksiz yeniden
+  çizim ve sayfa sıfırlaması olmuyor.
+- `removeTool` ve `loadTools` bitişte sayfayı geçerli aralığa sıkıştırır: son sayfadaki
+  son kart silinince bir önceki sayfa, `?page=99` ile açılışta son sayfa gösterilir.
+- Kategori hizalaması artık **yalnızca veri geldikten sonra** çalışıyor; `?category=Metin`
+  ile açılışta filtre daha ilk çizimde kaybolmuyor.
+- Filtre alanı `flex` sütuna alındı: beş kontrolün arası HTML satır sonlarından gelen
+  düzensiz boşluklar yerine eşit `gap` ile ayrılıyor.
+
 ## Yayınlanmamış — 2026-08-04
 
 Gün 3: tam CRUD, tek form ve geri alınabilir silme.

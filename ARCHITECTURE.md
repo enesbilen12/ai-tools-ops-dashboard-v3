@@ -19,11 +19,15 @@ Her modülün tek cümlelik sorumluluğu:
 > **[`API_CONTRACT.md`](API_CONTRACT.md)**.
 
 ### Durum (State)
-- **`src/state/store.js`** — Uygulamanın tek doğruluk kaynağı olan durumu (araçlar, filtreler, favoriler, tema, `editingId`, `drawerId`, `loading`, `saving`, `undo`, `error`) tutar ve değişiklikte abone bileşenleri bilgilendirir.
+- **`src/state/store.js`** — Uygulamanın tek doğruluk kaynağı olan durumu (araçlar, filtreler, `sort`, `page`, favoriler, tema, `editingId`, `drawerId`, `loading`, `saving`, `undo`, `error`) tutar ve değişiklikte abone bileşenleri bilgilendirir.
+
+> Alanların tam listesi, listenin ekrana gelene kadarki dönüşüm zinciri ve
+> adres çubuğu senkronu için: **[`STATE_DIAGRAM.md`](STATE_DIAGRAM.md)**.
 
 ### Bileşenler (Components)
 - **`src/components/dashboard.js`** — Diğer tüm bileşenleri bir araya getiren ana kapsayıcı; store'a abone olur ve genel yerleşimi çizer.
-- **`src/components/filters.js`** — Arama kutusu ile kategori ve durum filtrelerini çizer, kullanıcı girdisini store'a iletir.
+- **`src/components/filters.js`** — Arama kutusu ile kategori, durum ve sıralama menülerini çizer, kullanıcı girdisini store'a iletir (arama 300 ms gecikmeli).
+- **`src/components/pagination.js`** — Izgaranın altındaki sayfa gezinme çubuğu; tek sayfaya sığan listelerde tamamen gizlenir.
 - **`src/components/toolTable.js`** — Filtrelenmiş araç listesini kart ızgarası olarak çizer; kart aksiyonlarını (favori, düzenle, sil) ve kart gövdesine tıklamayı (detay çekmecesini açar) olay delegasyonuyla yürütür.
 - **`src/components/toolForm.js`** — **Tek** araç formunu üretir; `durum.editingId`'ye göre ekleme (POST) veya düzenleme (PATCH) modunda çalışır, girdiyi doğrular ve isteği store'a gönderir.
 - **`src/components/toolDrawer.js`** — Sağdan açılan salt-okunur detay çekmecesi; bir aracın tüm alanlarını (`id` dahil) gösterir ve favori/düzenle/sil kısayollarını sunar.
@@ -40,6 +44,10 @@ Her modülün tek cümlelik sorumluluğu:
 ### Yardımcılar (Utils — saf fonksiyonlar)
 - **`src/utils/validators.js`** — Form alanlarını doğrular (zorunlu alanlar, benzersiz ad, `^https?://` url kuralı) ve hata mesajlarını üretir.
 - **`src/utils/filters.js`** — Arama metnine ve seçili kategori/durum filtrelerine göre araç listesini süzer.
+- **`src/utils/sorting.js`** — Listeyi seçili ölçüte göre sıralar; karşılaştırmalar Türkçe harf sırasına (`localeCompare(…, 'tr')`) göre yapılır ve girdi dizisi değiştirilmez.
+- **`src/utils/pagination.js`** — Sayfa sayısını hesaplar, sayfa numarasını geçerli aralığa sıkıştırır ve listeyi dilimler.
+- **`src/utils/urlState.js`** — Görünüm durumu (arama, kategori, durum, sıralama, sayfa) ile `URLSearchParams` arasında çeviri yapar; dışarıdan gelen değerleri doğrular.
+- **`src/utils/debounce.js`** — Art arda gelen çağrıları tek çağrıya indirger (arama kutusu).
 - **`src/utils/csv.js`** — Araç listesini CSV metnine dönüştürür ve dosya olarak indirir.
 - **`src/utils/formatters.js`** — Görüntüleme için metinleri biçimlendirir (rozet etiketleri, güvenli/escape edilmiş metin, tarih vb.).
 
