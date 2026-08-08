@@ -6,13 +6,13 @@
 // güncellenir. Aksi hâlde her tuş vuruşunda arama kutusu odağı kaybederdi.
 
 import { escapeHtml } from '../utils/formatters.js';
-import { toolsToCSV, downloadCSV } from '../utils/csv.js';
+import { toolsToCSV, downloadFile } from '../utils/csv.js';
+import { toolsToJSON, exportFileName } from '../utils/exporters.js';
 import {
   subscribe,
   getState,
-  activeTools,
+  visibleTools,
   deletedTools,
-  isFavorite,
   toggleTheme,
   restoreTool,
   clearError,
@@ -23,6 +23,8 @@ import { mountToolTable } from './toolTable.js';
 import { mountToolDrawer } from './toolDrawer.js';
 import { mountToast } from './toast.js';
 import { mountPagination } from './pagination.js';
+import { mountStats } from './stats.js';
+import { mountImportPanel } from './importPanel.js';
 
 export function mountDashboard(kok) {
   kok.innerHTML = '';
@@ -59,24 +61,23 @@ export function mountDashboard(kok) {
   `;
   kok.appendChild(durumMesaji);
 
-  // --- Özet kutuları ---
-  const ozet = document.createElement('section');
-  ozet.className = 'ozet-alani';
-  ozet.innerHTML = `
-    <div class="ozet-kutu">Toplam Araç <strong id="ozet-toplam">0</strong></div>
-    <div class="ozet-kutu">Favoriler <strong id="ozet-favori">0</strong></div>
-  `;
-  kok.appendChild(ozet);
+  // --- Özet kutuları ve kategori dağılımı ---
+  const ozet = mountStats(kok);
 
   // --- Alt bileşenler (sıra v2 sayfa düzeniyle aynı) ---
   const filtreler = mountFilters(kok);
   const aracFormu = mountToolForm(kok);
 
-  // --- Dışa aktarma ---
+  // --- Veri aktarımı ---
+  // Dışa aktarma FİLTRELENMİŞ listeyi verir (ekrandaki sayfayı değil):
+  // kullanıcı 2. sayfadayken de eşleşen tüm kayıtlar iner.
   const exportAlani = document.createElement('section');
   exportAlani.className = 'export-alani';
-  exportAlani.innerHTML =
-    '<button id="export-btn" class="ekle-ac-btn" type="button">📤 CSV Dışa Aktar</button>';
+  exportAlani.innerHTML = `
+    <button id="export-csv-btn" class="ekle-ac-btn" type="button">📤 CSV</button>
+    <button id="export-json-btn" class="ekle-ac-btn" type="button">📤 JSON</button>
+    <button id="import-btn" class="ekle-ac-btn" type="button">📥 İçe Aktar</button>
+  `;
   kok.appendChild(exportAlani);
 
   const tablo = mountToolTable(kok);
@@ -86,6 +87,7 @@ export function mountDashboard(kok) {
   // konumlu) durdukları için yerleşimde nerede olduklarının önemi yok.
   const cekmece = mountToolDrawer(kok);
   const toast = mountToast(kok);
+  const iceAktarma = mountImportPanel(kok);
 
   // --- Alt bilgi ---
   const altBilgi = document.createElement('footer');
@@ -98,8 +100,8 @@ export function mountDashboard(kok) {
   const temaBtn = baslik.querySelector('#tema-btn');
   const silinenBtn = silinenAlani.querySelector('#silinen-btn');
   const silinenListesi = silinenAlani.querySelector('#silinen-liste');
-  const ozetToplam = ozet.querySelector('#ozet-toplam');
-  const ozetFavori = ozet.querySelector('#ozet-favori');
+  const csvBtn = exportAlani.querySelector('#export-csv-btn');
+  const jsonBtn = exportAlani.querySelector('#export-json-btn');
 
   const durumMetni = durumMesaji.querySelector('.durum-metin');
 
@@ -120,9 +122,23 @@ export function mountDashboard(kok) {
     if (!sonuc.ok) alert(sonuc.message);
   });
 
-  // CSV dışa aktarma: yalnızca aktif araçlar, iç alanlar (id/deleted) hariç.
-  exportAlani.querySelector('#export-btn').addEventListener('click', () => {
-    downloadCSV(toolsToCSV(activeTools()));
+  // Dışa aktarma: filtreden geçen TÜM kayıtlar (sayfalanmadan), iç alanlar
+  // (id/deleted) hariç. JSON, CSV ile aynı alanları taşır ki dosya doğrudan
+  // geri içe aktarılabilsin.
+  csvBtn.addEventListener('click', () => {
+    downloadFile(toolsToCSV(visibleTools()), exportFileName('csv'), 'text/csv;charset=utf-8;');
+  });
+
+  jsonBtn.addEventListener('click', () => {
+    downloadFile(
+      toolsToJSON(visibleTools()),
+      exportFileName('json'),
+      'application/json;charset=utf-8;'
+    );
+  });
+
+  exportAlani.querySelector('#import-btn').addEventListener('click', () => {
+    iceAktarma.open();
   });
 
   // --- Yeniden çizim ---
@@ -136,9 +152,12 @@ export function mountDashboard(kok) {
     durumMetni.textContent = seritHatasi;
     durumMesaji.hidden = !seritHatasi;
 
-    const aktifler = activeTools();
-    ozetToplam.textContent = aktifler.length;
-    ozetFavori.textContent = aktifler.filter((arac) => isFavorite(arac.name)).length;
+    // Düğmelerde sonuç sayısı: kullanıcı neyi indirdiğini bilsin.
+    const eslesen = visibleTools().length;
+    csvBtn.textContent = `📤 CSV (${eslesen})`;
+    jsonBtn.textContent = `📤 JSON (${eslesen})`;
+    csvBtn.disabled = eslesen === 0;
+    jsonBtn.disabled = eslesen === 0;
 
     const silinenler = deletedTools();
     silinenBtn.textContent = `🗑 Silinen Araçlar (${silinenler.length})`;
@@ -151,12 +170,14 @@ export function mountDashboard(kok) {
           .join('')
       : '<p class="silinen-bos">Silinen araç yok.</p>';
 
+    ozet.update(durum);
     filtreler.update(durum);
     aracFormu.update(durum);
     tablo.update(durum);
     sayfalama.update(durum);
     cekmece.update(durum);
     toast.update(durum);
+    iceAktarma.update(durum);
   }
 
   subscribe(ciz);

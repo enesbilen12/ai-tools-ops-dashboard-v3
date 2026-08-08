@@ -10,6 +10,13 @@
   --card-bg: #ffffff;   /* kart ve giriş kutusu arka planı */
   --border: #e0e0e0;    /* kenarlıklar */
   --danger: #c0392b;    /* silme butonu ve hata mesajı */
+
+  /* Veri görselleştirme: kategori dağılımı tek serilik bir büyüklük
+     karşılaştırması olduğu için TEK hue kullanılır. Açık ve koyu tema için
+     ayrı adımlar seçilmiştir (ters çevirme değil); ikisi de kendi kart
+     zeminine karşı 3:1 kontrastı geçer — açık 4.42:1, koyu 3.94:1. */
+  --seri: #2a78d6;      /* çubuk rengi */
+  --seri-yuva: #e8eaed; /* çubuğun arkasındaki, geri planda kalan yuva */
 }
 
 /* Koyu tema: <html data-theme="dark"> olunca bu değerler devreye girer. */
@@ -21,6 +28,8 @@
   --card-bg: #2a2a2a;
   --border: #444444;
   --danger: #ff7b6b; /* koyu zeminde okunur kalsın */
+  --seri: #3987e5;   /* koyu zemin için ayrı seçilmiş adım */
+  --seri-yuva: #3a3a3a;
 }
 
 /* Tüm sayfa için temel ayarlar */

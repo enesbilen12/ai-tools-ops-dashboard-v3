@@ -13,11 +13,12 @@
   border-radius: 8px;
 }
 
-/* --- Özet kutuları: toplam ve favori araç sayısı --- */
+/* --- Özet alanı: sayı kutuları satırı + altında kategori dağılımı --- */
 .ozet-alani {
   max-width: 900px;
   margin: 0 auto 16px;
   display: flex;
+  flex-direction: column; /* kutular üstte, dağılım altta */
   gap: 12px;
 }
 
@@ -536,4 +537,194 @@ button:disabled {
   font-size: 14px;
   color: var(--muted);
   text-align: center;
+}
+
+/* --- Özet alanı: KPI kutuları + kategori dağılımı --- */
+
+/* Dört sayı kutusu yan yana; dar ekranda alta sarar. */
+.ozet-kutular {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* --- Kategori dağılımı (yatay çubuk) ---
+   Tek serilik bir büyüklük karşılaştırması: TEK hue kullanılır. Kategori adı
+   doğrudan yazılı ve sayı da metin olarak duruyor; her kategoriye ayrı renk
+   vermek hiçbir şey kodlamaz, yalnızca süs olurdu.
+
+   Renk değişkenleri diğer tema renkleriyle birlikte base.css'te tanımlı. */
+
+.dagilim {
+  margin-top: 12px;
+  padding: 16px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+/* Başlık tek seriyi adlandırır; bu yüzden ayrıca gösterge (legend) yok. */
+.dagilim-baslik {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: normal;
+  color: var(--muted);
+}
+
+.dagilim-satir {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  /* Çubuklar arasında 2px zemin boşluğu kalsın diye satır aralığı. */
+  padding: 3px 0;
+}
+
+.dagilim-ad {
+  font-size: 13px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Yuva: ölçeğin tamamını gösterir, geri planda kalır. */
+.dagilim-yuva {
+  display: block;
+  height: 10px;
+  background-color: var(--seri-yuva);
+  border-radius: 5px;
+}
+
+/* Veri ucu 4px yuvarlatılır, taban çizgisine (solda) yapışık kalır. */
+.dagilim-cubuk {
+  display: block;
+  height: 100%;
+  min-width: 4px;
+  background-color: var(--seri);
+  border-radius: 0 4px 4px 0;
+}
+
+/* Sayı ve oran metin belirteciyle yazılır, seri rengiyle değil: rengi taşıyan
+   tek şey çubuk olsun. */
+.dagilim-sayi {
+  font-size: 13px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.dagilim-oran {
+  color: var(--muted);
+}
+
+.dagilim-bos {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* --- Veri aktarım düğmeleri --- */
+.export-alani {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* --- İçe aktarma paneli --- */
+.import-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 21; /* perdenin üstünde */
+  width: 560px;
+  max-width: calc(100% - 32px);
+  max-height: calc(100% - 64px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 20px;
+  background-color: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.import-ust {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.import-ust h2 {
+  flex: 1;
+  margin: 0;
+  font-size: 18px;
+}
+
+.import-kapat {
+  cursor: pointer;
+  padding: 0 6px;
+  font-size: 22px;
+  line-height: 1;
+  background: none;
+  color: var(--text);
+  border: none;
+}
+
+.import-bolum {
+  margin-top: 16px;
+}
+
+.import-bolum h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+/* Uzun listeler paneli taşırmasın; kendi içinde kaysın. */
+.import-liste {
+  margin: 0;
+  padding-left: 18px;
+  max-height: 180px;
+  overflow-y: auto;
+  font-size: 13px;
+}
+
+.import-liste li {
+  margin-bottom: 4px;
+}
+
+.import-gecersiz li {
+  color: var(--danger);
+}
+
+.import-soluk {
+  color: var(--muted);
+}
+
+.import-hata {
+  margin: 16px 0 0;
+  color: var(--danger);
+}
+
+.import-ipucu,
+.import-sonuc {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.import-aksiyonlar {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.import-aksiyonlar button {
+  cursor: pointer;
+  padding: 8px 14px;
+  font-size: 14px;
+  background-color: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
 }
