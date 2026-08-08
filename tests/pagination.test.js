@@ -90,3 +90,45 @@ describe('paginateTools', () => {
     expect(liste).toEqual(kopya);
   });
 });
+
+// --- Sınır ve hatalı tip senaryoları (Gün 6) ---
+
+describe('bozuk pageSize', () => {
+  it('sıfır, negatif ve NaN pageSize varsayılana düşer', () => {
+    [0, -5, NaN, 'abc', null].forEach((boyut) => {
+      expect(pageCount(25, boyut)).toBe(pageCount(25, DEFAULT_PAGE_SIZE));
+      expect(paginateTools(liste, 1, boyut)).toHaveLength(DEFAULT_PAGE_SIZE);
+    });
+  });
+
+  it('pageSize listeden büyükse tek sayfa olur', () => {
+    expect(pageCount(5, 100)).toBe(1);
+    expect(paginateTools(liste, 1, 100)).toHaveLength(25);
+  });
+
+  it('pageSize 1 ile her kayıt ayrı sayfadadır', () => {
+    expect(pageCount(25, 1)).toBe(25);
+    expect(paginateTools(liste, 7, 1)[0].id).toBe(7);
+  });
+});
+
+describe('bozuk sayfa numarası', () => {
+  it('ondalık sayfa aşağı yuvarlanır', () => {
+    expect(clampPage(2.7, 25, 12)).toBe(2);
+    expect(paginateTools(liste, 2.7, 12)).toEqual(paginateTools(liste, 2, 12));
+  });
+
+  // Sonlu olmayan değer "sonun ötesi" değil, GEÇERSİZ sayılır ve NaN/'abc' ile
+  // aynı kola düşer. URL'den gelemez (parseInt('Infinity') -> NaN) ve arayüzde
+  // üretilemez; çöp girdide güvenli varsayılana dönmek son sayfaya atlamaktan
+  // daha öngörülebilir.
+  it('Infinity geçersiz sayılıp ilk sayfaya düşer', () => {
+    expect(clampPage(Infinity, 25, 12)).toBe(1);
+    expect(clampPage(-Infinity, 25, 12)).toBe(1);
+  });
+
+  it('negatif toplam sayfa sayısını bozmaz', () => {
+    expect(pageCount(-10, 12)).toBe(1);
+    expect(clampPage(1, -10, 12)).toBe(1);
+  });
+});

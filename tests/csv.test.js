@@ -45,3 +45,67 @@ describe('toolsToCSV', () => {
     expect(csv.split('\n')).toHaveLength(2);
   });
 });
+
+// --- Sınır ve hatalı tip senaryoları (Gün 6) ---
+
+describe('toolsToCSV — sınırlar', () => {
+  it('boş listede yalnızca başlık satırı üretir', () => {
+    const csv = toolsToCSV([]);
+    expect(csv).toBe(CSV_COLUMNS.join(','));
+    expect(csv.split('\n')).toHaveLength(1);
+  });
+
+  it('null ve undefined hücreleri boş yazar', () => {
+    const csv = toolsToCSV([{ ...araclar[0], owner: null, note: undefined }]);
+    expect(csv).not.toContain('null');
+    expect(csv).not.toContain('undefined');
+  });
+
+  it('özel sütun listesi verilebilir', () => {
+    const csv = toolsToCSV(araclar, ['name', 'url']);
+    expect(csv.split('\n')[0]).toBe('name,url');
+    expect(csv).not.toContain('Freemium');
+  });
+
+  it('yalnızca satır sonu içeren hücre tırnağa alınır', () => {
+    const csv = toolsToCSV([{ ...araclar[0], note: 'a\nb' }]);
+    expect(csv).toContain('"a\nb"');
+  });
+
+  it('yalnızca virgül içeren hücre tırnağa alınır', () => {
+    expect(toolsToCSV([{ ...araclar[0], note: 'a,b' }])).toContain('"a,b"');
+  });
+
+  it('sayı ve boolean değerler metne çevrilir', () => {
+    const csv = toolsToCSV([{ ...araclar[0], note: 42, owner: false }]);
+    expect(csv).toContain('42');
+    expect(csv).toContain('false');
+  });
+});
+
+// Uygulama Türkçe; dışa aktarılan dosyada harflerin bozulmaması kritik.
+describe('toolsToCSV — Türkçe karakterler', () => {
+  const turkce = {
+    name: 'Şema Çizer',
+    category: 'Tasarım',
+    purpose: 'İş akışı çizimi',
+    owner: 'Ödev A.Ş.',
+    note: 'ğüşiöç ĞÜŞİÖÇ',
+    url: 'https://ornek.com',
+    subscription: 'Ücretsiz',
+    status: 'Aktif',
+  };
+
+  it('Türkçe harfleri bozmadan yazar', () => {
+    const csv = toolsToCSV([turkce]);
+    expect(csv).toContain('Şema Çizer');
+    expect(csv).toContain('İş akışı çizimi');
+    expect(csv).toContain('ğüşiöç ĞÜŞİÖÇ');
+    expect(csv).toContain('Ücretsiz');
+  });
+
+  it('Türkçe metin gereksiz yere tırnağa alınmaz', () => {
+    // Kaçırma yalnızca virgül/tırnak/satır sonu içinse yapılır.
+    expect(toolsToCSV([turkce])).not.toContain('"Şema Çizer"');
+  });
+});

@@ -90,6 +90,31 @@ describe('sortTools', () => {
   it('boş listede boş dizi döndürür', () => {
     expect(sortTools([], 'name-asc')).toEqual([]);
   });
+
+  // --- Sınır ve hatalı tip senaryoları (Gün 6) ---
+
+  it('adı olmayan kayıt çökertmez', () => {
+    const eksik = [{ name: 'B' }, {}, { name: null }, { name: 'A' }];
+    expect(() => sortTools(eksik, 'name-asc')).not.toThrow();
+    expect(sortTools(eksik, 'name-asc')).toHaveLength(4);
+  });
+
+  it('kategorisi olmayan kayıt çökertmez', () => {
+    expect(() => sortTools([{ name: 'A' }, { name: 'B' }], 'category-asc')).not.toThrow();
+  });
+
+  it('tek elemanlı liste aynen döner', () => {
+    expect(adlar(sortTools([{ name: 'Tek' }], 'name-desc'))).toEqual(['Tek']);
+  });
+
+  it('tümü eşit olan liste uzunluğunu korur', () => {
+    const ayni = [{ name: 'A' }, { name: 'A' }, { name: 'A' }];
+    expect(sortTools(ayni, 'name-asc')).toHaveLength(3);
+  });
+
+  it('sıralama argümanı verilmezse varsayılanı kullanır', () => {
+    expect(adlar(sortTools(araclar))).toEqual(adlar(sortTools(araclar, DEFAULT_SORT)));
+  });
 });
 
 describe('isSortOption', () => {
