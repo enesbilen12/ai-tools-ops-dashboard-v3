@@ -1,5 +1,36 @@
 # Değişiklik Günlüğü
 
+## Yayınlanmamış — 2026-08-08 (Gün 6)
+
+Gün 6: test boşluklarının kapatılması, kod incelemesi ve README.
+
+### Düzeltildi
+- **Türkçe İ/ı benzersizlik kontrolünü ve aramayı bozuyordu.** JavaScript'in
+  `toLowerCase()`'i `"İzleme"` için `"i̇zleme"` (i + birleşen nokta) üretiyor;
+  bu yüzden "İzleme" ve "izleme" **iki ayrı araç olarak eklenebiliyordu** ve
+  "izleme" araması "İzleme" adlı aracı bulamıyordu. Kural artık
+  `utils/text.js`'te tek yerde: `validators`, `filters` ve `store.restoreTool`
+  oradan geçiyor.
+- **"undefined" araması eksik alanlı araçları buluyordu.** `toolMatches` alanları
+  şablon dizgisiyle birleştirirken eksik alan `"undefined"` metnine dönüşüyordu.
+- **`validateForm` adsız kayıtta çöküyordu** (`TypeError`). `db.json`'daki bir
+  kayıttan `name` düşerse ekleme ve düzenleme formu tamamen kilitleniyordu.
+- **Yalnızca boşluktan oluşan ad geçerli sayılıyordu.** Kırpma artık
+  doğrulayıcının içinde; savunma çağırana bağlı değil.
+- **Çöp menüsünden geri yüklemede favori kayboluyordu.** Favori bilgisi yalnızca
+  5 saniyelik `undo` kaydında tutuluyordu; süre dolduktan sonra çöpten geri
+  yükleyen kullanıcı favorisini sessizce kaybediyordu. Bilgi artık kaydın ömrü
+  boyunca saklanıyor ve iki geri yükleme yolu aynı sonucu veriyor.
+
+### Eklendi
+- **`utils/text.js`** — Türkçeye uygun karşılaştırma (`esitMetin`, `icerirMetin`).
+- **49 yeni test** (118 → 167): boş değer, sınır değer, Türkçe karakter ve hatalı
+  tip senaryoları; `validators`, `filters`, `csv`, `sorting`, `pagination`.
+- **`README.md`** — kurulum (iki terminal uyarısıyla), komutlar, özellikler,
+  mimari haritası, belge dizini, bilinen sınırlar.
+- **`REVIEW.md`** — kod incelemesi: düzeltilen kusurlar, bilinen riskler
+  (erişilebilirlik, CSV/Excel, yeniden giriş) ve refactor önerileri.
+
 ## Yayınlanmamış — 2026-08-08 (Gün 5)
 
 Gün 5: istatistikler, dışa/içe aktarma ve iptal edilebilir yükleme.

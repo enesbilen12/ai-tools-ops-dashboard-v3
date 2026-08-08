@@ -19,7 +19,7 @@ case-insensitive) — favoriler bu ada göre saklanır. Ayrıca yumuşak silme i
 
 | Alan | Açıklama | Kural |
 |------|----------|-------|
-| `name` | Araç adı | Zorunlu, benzersiz (harf duyarsız) |
+| `name` | Araç adı | Zorunlu, benzersiz (**Türkçeye uygun** harf duyarsız — "İzleme" ile "izleme" aynı addır) |
 | `category` | Kategori | Zorunlu (Metin, Görsel, Kod, Tasarım, Ses/Müzik, Video, Verimlilik, Araştırma) |
 | `purpose` | Amaç / açıklama | Zorunlu |
 | `owner` | Sağlayıcı / geliştirici | Opsiyonel |
@@ -40,7 +40,9 @@ listede hızlıca bulabileyim.
       durakladıktan **300 ms** sonra yapılır (her tuş vuruşunda değil), kutu bu sırada
       donmaz ve odağını kaybetmez.
 - [ ] Arama `name`, `category` ve `purpose` alanlarında eşleşme arar (`owner` ve `note` dahil değildir).
-- [ ] Arama **büyük/küçük harf duyarsızdır**.
+- [ ] Arama **büyük/küçük harf duyarsızdır** ve **Türkçe harfleri doğru eşler**:
+      "izleme" araması "İzleme" adlı aracı bulur, "ışık" araması "IŞIK"ı bulur.
+      i/ı/İ/I tek harf sayılır; ş/s, ö/o gibi gerçek harf farkları korunur.
 - [ ] Arama, kategori ve durum filtreleriyle **VE (AND)** mantığıyla birlikte çalışır.
 - [ ] Arama kutusu boşaltıldığında (diğer filtreler nötrse) tüm araçlar yeniden görünür.
 - [ ] Hiçbir sonuç yoksa kullanıcıya boş/uygun bir durum gösterilir.
@@ -127,6 +129,8 @@ yükleyebilmek) istiyorum ki listemi güvenle düzenli tutabileyim.
 - [ ] Her kartta ve detay çekmecesinde **"🗑 Sil"** butonu bulunur; silme **tek tıkla** olur.
 - [ ] Silmeden sonra **5 saniyelik geri alma toast'ı** gösterilir (`"<ad>" silindi.` + "↩︎ Geri al").
 - [ ] "Geri al" kaydı aktif listeye döndürür **ve silme anında favori idiyse favoriyi de geri getirir**.
+- [ ] **Çöp menüsünden geri yükleme de favoriyi geri getirir** — toast'ın süresi
+      dolmuş olsa bile. İki geri yükleme yolu aynı sonucu verir.
 - [ ] Toast'ın süresi dolduğunda **hiçbir şey yok edilmez**; yalnızca kısayol biter,
       kayıt çöp menüsünden hâlâ geri yüklenebilir.
 - [ ] Silinen araç aktif listeden çıkarılır ancak **çöp listesine (soft delete)** taşınır — kalıcı olarak yok edilmez.
@@ -152,7 +156,8 @@ kullandıklarımı öne çıkarabileyim.
 - [ ] Favoriler, `localStorage`'da **isim listesi** olarak saklanır (`ai-araclari-paneli:favoriler` anahtarı).
 - [ ] Özet kutusundaki **"Favoriler" sayacı** favori sayısını güncel gösterir.
 - [ ] Bir araç yeniden adlandırıldığında favori durumu **korunur** (yeni ada taşınır).
-- [ ] Bir araç silindiğinde favorilerden **çıkarılır**.
+- [ ] Bir araç silindiğinde favorilerden **çıkarılır**; geri yüklenirse
+      (hangi yoldan olursa olsun) favori durumu **geri gelir**.
 - [ ] Favoriler oturumlar arasında (sayfa yenilense de) korunur.
 
 ---

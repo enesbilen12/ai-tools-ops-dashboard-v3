@@ -55,6 +55,7 @@ Her modülün tek cümlelik sorumluluğu:
 - **`src/utils/importer.js`** — İçe aktarma dosyasını çözümler ve kayıtları geçerli/geçersiz olarak ayırır (doğrulama `validators.js`'e devredilir).
 - **`src/utils/stats.js`** — Özet sayılarını ve kategori dağılımını hesaplar.
 - **`src/utils/formatters.js`** — Görüntüleme için metinleri biçimlendirir (rozet etiketleri, güvenli/escape edilmiş metin, tarih vb.).
+- **`src/utils/text.js`** — Türkçeye uygun metin karşılaştırması. JavaScript'in `toLowerCase()`'i İ/ı için yanlış sonuç verdiğinden benzersizlik kontrolü, arama ve geri yükleme çakışması bu tek kuraldan geçer.
 
 ## Veri Akışı (Data Flow)
 

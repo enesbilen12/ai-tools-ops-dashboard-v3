@@ -4,6 +4,69 @@ Her gün ne yaptığımı kısaca not aldığım dosya. En yeni gün en üstte.
 
 ---
 
+## Gün 6
+
+- **Tarih:** 2026-08-08
+- **Bugünkü hedef:** Test boşluklarını kapatmak, kod incelemesi ve README.
+- **Yaptığım değişiklikler:** Önce mevcut 118 testi tarayıp eksikleri çıkardım:
+  boş değer, sınır değer, Türkçe karakter ve hatalı tip senaryoları neredeyse
+  hiç yoktu. **49 test ekledim (118 → 167)** ve bunlar **beş gerçek kusur**
+  ortaya çıkardı; her birini önce başarısız olan bir testle yazıp sonra
+  düzelttim. En önemlisi: JavaScript'in `toLowerCase()`'i Türkçe İ/ı için yanlış
+  sonuç verdiği için "İzleme" ile "izleme" **iki ayrı araç olarak
+  eklenebiliyordu** ve "izleme" araması "İzleme"yi bulamıyordu. Kuralı
+  `utils/text.js`'e topladım. Ayrıca "undefined" araması eksik alanlı araçları
+  buluyordu, `validateForm` adsız kayıtta çöküyordu, yalnızca boşluktan oluşan
+  ad geçerli sayılıyordu ve **çöp menüsünden geri yüklemede favori
+  kayboluyordu** (toast'tan geri alınca kaybolmuyordu — iki yol farklı
+  davranıyordu). `REVIEW.md` ve `README.md` yazıldı.
+- **Değişen dosyalar:** src/utils/text.js (yeni), src/utils/validators.js,
+  src/utils/filters.js, src/state/store.js,
+  tests/{validators,filters,csv,sorting,pagination}.test.js,
+  README.md (yeni), REVIEW.md (yeni), ARCHITECTURE.md, USER_STORIES.md,
+  CHANGELOG.md, TEST_REPORT.md
+- **Claude Code'a verdiğim ana prompt:** "Gün 6 görevleri: Mevcut testleri incele —
+  hangi senaryolar eksik? (boş değer, sınır değer, Türkçe karakter, hatalı tip) ·
+  validators, filter/sort/pagination, CSV için eksik testleri ekle · Read-only kod
+  review: veri kaybı, race condition, yanlış state, erişilebilirlik riski ara ·
+  Refactor önerileri listele · README.md oluştur. Önce mevcut test durumunu ve
+  eksikleri raporla."
+- **Test ettiklerim:** `npm test`; `npm run build`; store + json-server duman
+  testi (18 kontrol): favori kaybının uçtan uca düzeldiği (favorile → sil →
+  `clearUndo` → çöpten geri yükle → favori geri geldi), toast yolunun
+  bozulmadığı, Türkçe benzersizlik ve aramanın gerçek veriyle çalıştığı,
+  "undefined" aramasının artık boş döndüğü.
+- **Geçen testler:** `npm test` **167/167** (Gün 5'teki 118'e 49 test eklendi).
+  Duman testi **18/18**. `npm run build` hatasız (31 modül, JS 31.74 kB /
+  gzip 10.23 kB). `db.json` 20 kayıtlık hâliyle korundu.
+- **Kalan sorunlar:** `REVIEW.md` §2'de yedi bilinen risk duruyor ve bu turda
+  bilinçli olarak dokunulmadı: kartın `role="button"` taşıyıp içinde buton
+  bulundurması (ARIA ihlali), çekmece/panelde odak tuzağı olmaması, kalan bir
+  `alert()`, CSV'de BOM olmadığı için Excel'in Türkçe harfleri bozması, filtre
+  bileşenindeki yeniden giriş, kaldırılmayan `keydown` dinleyicileri ve
+  `importTools`'un iptal edilememesi. Ayrıca store ve bileşenler hâlâ birim
+  testsiz (jsdom gerekiyor); Gün 5'in arayüzü tarayıcıda görülmedi.
+- **Bugün öğrendiğim kavram:** Testin **önce kırmızı olması gerektiği** — yazdığım
+  test düzeltmeden önce geçiyorsa bir şey yakalamıyor demektir; 10 testin
+  başarısız olduğunu görmek kusurların gerçekliğinin kanıtıydı. Yerelleştirmede
+  `toLowerCase()` ile `toLocaleLowerCase('tr')` farkı ve ikincisinin tek başına
+  yetmediği ("AI" → "aı" olup aramayı bozuyor, bu yüzden ı→i katlaması gerekli).
+  Aynı işi yapan iki yolun (toast'tan geri alma / çöpten geri yükleme) **aynı
+  sonucu vermesi gerektiği** — farklı davranmaları sessiz veri kaybı üretiyordu.
+  Bir de v2'den taşınan kodun yeni yazılandan daha az test edilmiş olmasının bu
+  projede gerçek bir risk kaynağı olduğu: beş kusurun dördü ilk gün taşınan üç
+  modülde çıktı.
+- **Yarın yapacağım iş:** Gün 7 (planlanacak) — `REVIEW.md`'deki erişilebilirlik
+  maddeleri güçlü aday.
+- **Commit mesajları:** test(utils): cover boundary and wrong-type cases ·
+  fix(validators): validate trimmed input and survive malformed records ·
+  fix(filters): stop matching missing fields as "undefined" ·
+  feat(utils): compare text the Turkish way ·
+  fix(state): keep favourites when restoring from the trash ·
+  docs: add a code review · docs: add a readme · docs: record day 6
+
+---
+
 ## Gün 5
 
 - **Tarih:** 2026-08-08

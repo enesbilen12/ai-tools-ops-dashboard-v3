@@ -10,18 +10,18 @@ npx vitest run
 
 | Dosya | Test | Sonuç |
 |---|---|---|
-| `tests/filters.test.js` | 7 | ✅ |
-| `tests/validators.test.js` | 8 | ✅ |
-| `tests/csv.test.js` | 5 | ✅ |
-| `tests/toolsApi.test.js` | 14 | ✅ |
-| `tests/sorting.test.js` | 11 | ✅ |
-| `tests/pagination.test.js` | 18 | ✅ |
-| `tests/urlState.test.js` | 12 | ✅ |
+| `tests/filters.test.js` | 22 | ✅ |
+| `tests/validators.test.js` | 23 | ✅ |
+| `tests/csv.test.js` | 13 | ✅ |
+| `tests/toolsApi.test.js` | 18 | ✅ |
+| `tests/sorting.test.js` | 16 | ✅ |
+| `tests/pagination.test.js` | 22 | ✅ |
+| `tests/urlState.test.js` | 14 | ✅ |
 | `tests/debounce.test.js` | 4 | ✅ |
 | `tests/stats.test.js` | 11 | ✅ |
-| `tests/importer.test.js` | 16 | ✅ |
+| `tests/importer.test.js` | 15 | ✅ |
 | `tests/exporters.test.js` | 9 | ✅ |
-| **Toplam** | **118** | **✅ 118/118** |
+| **Toplam** | **167** | **✅ 167/167** |
 
 Gün 3'te `validators.test.js`'e iki regresyon testi eklendi: benzersizlik kontrolünde
 `currentId` metin (`"1"`), kayıt id'si sayı (`1`) geldiğinde aracın kendi adının hariç
@@ -34,8 +34,20 @@ URL'in gidiş-dönüşte (state → params → state) durumu koruması ve bozuk 
 (`?page=abc&sort=xyz&status=Uydurma`) varsayılana düşmesi. `debounce` testleri
 `vi.useFakeTimers()` ile çalışır.
 
-Gün 5'te üç modül daha eklendi (79 → 118) ve `toolsApi.test.js`'e iptal testleri
-girdi. Öne çıkanlar: "Durumu Aktif" ile "silinmemiş" ayrımının doğru sayılması,
+**Gün 6'da 49 test eklendi (118 → 167)** ve bunlar **beş gerçek kusur** ortaya
+çıkardı — her biri önce başarısız olan bir testle yazılıp sonra düzeltildi
+(`REVIEW.md` §1): Türkçe İ/ı'nın benzersizlik kontrolünü ve aramayı atlatması,
+"undefined" aramasının eksik alanlı araçları bulması, `validateForm`'un adsız
+kayıtta çökmesi, yalnızca boşluktan oluşan adın kabul edilmesi ve çöp menüsünden
+geri yüklemede favorinin kaybolması.
+
+Eklenen testlerin odağı: **boş değer** (boş liste, boş arama, alansız nesne),
+**sınır değer** (`pageSize` 0/negatif/NaN, ondalık sayfa, tek elemanlı liste),
+**Türkçe karakter** (İ/ı/Ş/Ö benzersizlik ve arama, CSV'de bozulmama) ve
+**hatalı tip** (`null`/`undefined` alanlar, nesne olmayan girdi, argümansız çağrı).
+
+Gün 5'te üç modül daha eklenmişti (79 → 118) ve `toolsApi.test.js`'e iptal testleri
+girmişti. Öne çıkanlar: "Durumu Aktif" ile "silinmemiş" ayrımının doğru sayılması,
 kategori dağılımının çoktan aza + Türkçe harf sırasıyla dizilmesi, içe aktarmada
 çakışan ve **aynı dosyada tekrar eden** adların ayrılması, `id`/`deleted` gibi
 alanların atılması, **dışa aktar → içe aktar (round trip)** zincirinin kayıpsız
@@ -53,8 +65,8 @@ HTTP metodu, `softDeleteTool`'un `DELETE` değil `PATCH {deleted:true}` yollamas
 npm run build
 ```
 
-✅ Hatasız. 30 modül dönüştürüldü.
-Çıktı: `index.html` 1.11 kB · CSS 9.61 kB · JS 31.02 kB (gzip 9.87 kB).
+✅ Hatasız. 31 modül dönüştürüldü.
+Çıktı: `index.html` 1.11 kB · CSS 9.97 kB · JS 31.74 kB (gzip 10.23 kB).
 
 ## 3. Entegrasyon dumanı testi (store + api, tarayıcısız)
 
@@ -143,6 +155,21 @@ hâliyle korundu (kontrol edildi: "Duman" artığı yok).
 | Çift kayıt koruması | Aynı dosya ikinci kez: hiçbir kayıt geçerli değil, liste büyümedi |
 | Round trip | Dışa aktar → sil → içe aktar: kayıtlar geri geldi, alanlar korundu, **yeni id üretildi** (id taşınmadı) |
 | Boş içe aktarma | İstek gitmedi, durum kirlenmedi |
+
+## 3f. Kusur düzeltmeleri (Gün 6, tarayıcısız)
+
+Çalışan json-server'a karşı. **18 kontrolün 18'i geçti.** Koşu sonunda eklenen
+kayıtlar silindi; `db.json` 20 kayıtlık hâliyle korundu.
+
+| Senaryo | Doğrulanan |
+|---|---|
+| Favori kaybı (D1) | Favorile → sil → `clearUndo` (5 sn doldu) → **çöpten** geri yükle → **favori geri geldi** |
+| Toast yolu | Aynı senaryo toast'tan geri alındığında da çalışıyor (regresyon yok) |
+| Yanlış pozitif yok | Favori olmayan kayıt geri yüklenince favori olmuyor |
+| Türkçe benzersizlik (K1) | "İzleme Aracı" eklendikten sonra "izleme aracı" ve "İZLEME ARACI" **çakışma** sayılıyor; "İzleme Paneli" geçiyor |
+| Türkçe arama (K1) | "izleme" ve "IZLEME" aramaları "İzleme Aracı"nı buluyor |
+| "undefined" araması (K2) | Hiçbir sonuç dönmüyor |
+| Geri yükleme çakışması (D2) | Harf duyarsız aynı ad varken geri yükleme engelleniyor |
 
 ## 4. Dev sunucusu
 
