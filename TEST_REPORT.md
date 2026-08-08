@@ -18,7 +18,10 @@ npx vitest run
 | `tests/pagination.test.js` | 18 | ✅ |
 | `tests/urlState.test.js` | 12 | ✅ |
 | `tests/debounce.test.js` | 4 | ✅ |
-| **Toplam** | **79** | **✅ 79/79** |
+| `tests/stats.test.js` | 11 | ✅ |
+| `tests/importer.test.js` | 16 | ✅ |
+| `tests/exporters.test.js` | 9 | ✅ |
+| **Toplam** | **118** | **✅ 118/118** |
 
 Gün 3'te `validators.test.js`'e iki regresyon testi eklendi: benzersizlik kontrolünde
 `currentId` metin (`"1"`), kayıt id'si sayı (`1`) geldiğinde aracın kendi adının hariç
@@ -30,6 +33,13 @@ değiştirilmediği, sayfa numarasının taşan/negatif/sayı-olmayan değerlerd
 URL'in gidiş-dönüşte (state → params → state) durumu koruması ve bozuk sorgunun
 (`?page=abc&sort=xyz&status=Uydurma`) varsayılana düşmesi. `debounce` testleri
 `vi.useFakeTimers()` ile çalışır.
+
+Gün 5'te üç modül daha eklendi (79 → 118) ve `toolsApi.test.js`'e iptal testleri
+girdi. Öne çıkanlar: "Durumu Aktif" ile "silinmemiş" ayrımının doğru sayılması,
+kategori dağılımının çoktan aza + Türkçe harf sırasıyla dizilmesi, içe aktarmada
+çakışan ve **aynı dosyada tekrar eden** adların ayrılması, `id`/`deleted` gibi
+alanların atılması, **dışa aktar → içe aktar (round trip)** zincirinin kayıpsız
+olması ve `AbortError`'ın ağ hatasından ayrılması.
 
 `toolsApi.test.js`, `globalThis.fetch`'i taklit eder — çalışan bir json-server
 gerektirmez. Kapsadığı: `normalizeError`'ın status 0 / 404 / 4xx / 5xx kolları,
@@ -43,8 +53,8 @@ HTTP metodu, `softDeleteTool`'un `DELETE` değil `PATCH {deleted:true}` yollamas
 npm run build
 ```
 
-✅ Hatasız. 25 modül dönüştürüldü.
-Çıktı: `index.html` 1.11 kB · CSS 7.49 kB · JS 23.44 kB (gzip 7.71 kB).
+✅ Hatasız. 30 modül dönüştürüldü.
+Çıktı: `index.html` 1.11 kB · CSS 9.61 kB · JS 31.02 kB (gzip 9.87 kB).
 
 ## 3. Entegrasyon dumanı testi (store + api, tarayıcısız)
 
@@ -118,6 +128,22 @@ Koşu sonunda silinen kayıtlar geri yüklendi; `db.json` 20 kayıtlık hâliyle
 | Tek sayfalık sonuç | `setPage(2)` 1'e sıkıştı, URL'e `page` girmedi |
 | Son karttaki silme | Sayfa bir öncekine düştü, hiçbir zaman 0/negatif olmadı |
 
+## 3e. İçe/dışa aktarma ve iptal (Gün 5, tarayıcısız)
+
+Aynı yöntemle, çalışan json-server'a karşı. **28 kontrolün 28'i geçti.**
+Koşu sonunda eklenen kayıtlar `DELETE` ile temizlendi; `db.json` 20 kayıtlık
+hâliyle korundu (kontrol edildi: "Duman" artığı yok).
+
+| Senaryo | Doğrulanan |
+|---|---|
+| İstatistik tutarlılığı | Kategori ve durum dağılımlarının toplamı listedeki kayıt sayısına eşit |
+| İptal | Üst üste üç `loadTools`: **hata yazılmadı**, liste bozulmadı, `loading` kapandı |
+| Doğrulama ayrımı | 6 kayıtlık karışık dosyada 2 geçerli / 4 geçersiz; çakışan ad ve **dosya içi tekrar** doğru sebeple ayrıldı |
+| Sıralı ekleme | 2 kayıt eklendi, `importProgress` **1/2 → 2/2** dalgası görüldü, sonunda `null` |
+| Çift kayıt koruması | Aynı dosya ikinci kez: hiçbir kayıt geçerli değil, liste büyümedi |
+| Round trip | Dışa aktar → sil → içe aktar: kayıtlar geri geldi, alanlar korundu, **yeni id üretildi** (id taşınmadı) |
+| Boş içe aktarma | İstek gitmedi, durum kirlenmedi |
+
 ## 4. Dev sunucusu
 
 `npm run api` + `npm run dev` birlikte ayağa kalktı.
@@ -151,5 +177,12 @@ buton kilitleri, sayfa değişiminde ızgaranın başına kaydırma, adres çubu
 gerçekten güncellendiği ve yenilemede görünümün geri geldiği — mantıkları
 `§3d`'de doğrulandı, çizimleri görülmedi.
 
+**Gün 5 arayüzü de gözle görülmedi:** kategori dağılımı çubuklarının yerleşimi ve
+koyu temada okunurluğu, içe aktarma panelinin önizleme/ilerleme/sonuç ekranları,
+dosya seçicinin açılması ve dışa aktarılan dosyanın diske gerçekten inmesi —
+mantıkları `§3e`'de doğrulandı, çizimleri görülmedi. Çubuk renkleri **hesapla**
+denetlendi (açık 4.42:1, koyu 3.94:1 — ikisi de 3:1 eşiğinin üstünde), ama ekranda
+görülmedi.
+
 Bu maddeler için `npm run api` + `npm run dev` çalıştırılıp
-`USER_STORIES.md`'deki US-01…US-14 kabul kriterleri elle geçilmelidir.
+`USER_STORIES.md`'deki US-01…US-17 kabul kriterleri elle geçilmelidir.

@@ -66,7 +66,7 @@ sebebini ve bir **"↻ Tekrar dene"** butonu gösterir.
 
 | İşlem | Metot | Yol | Gövde | Yanıt |
 |---|---|---|---|---|
-| Tüm araçlar | `GET` | `/tools` | — | `200` + dizi (silinenler **dahil**) |
+| Tüm araçlar | `GET` | `/tools` | — (`AbortSignal` alabilir) | `200` + dizi (silinenler **dahil**) |
 | Ekle | `POST` | `/tools` | Kayıt (id'siz) + `deleted: false` | `201` + oluşan kayıt (`id` ile) |
 | Güncelle | `PATCH` | `/tools/:id` | Yalnızca değişen alanlar | `200` + güncel kayıt |
 | Yumuşak sil | `PATCH` | `/tools/:id` | `{ "deleted": true }` | `200` |
@@ -101,6 +101,7 @@ sokar. Fırlatılan `Error` üç ek alan taşır:
 
 | `status` | Ne zaman | Mesaj |
 |---|---|---|
+| `-1` | İstek **iptal edildi** (`AbortController`); `aborted: true` taşır | "İstek iptal edildi." |
 | `0` | Yanıt hiç alınamadı (sunucu kapalı, ağ hatası) | "API'ye ulaşılamadı. json-server çalışıyor mu? (npm run api)" |
 | `404` | Kayıt yok (ör. başka sekmede silinmiş) | "Kayıt bulunamadı (404). Liste güncel olmayabilir, yenileyin." |
 | `4xx` | İstek reddedildi | "İstek reddedildi (HTTP …)." |
@@ -129,6 +130,13 @@ patlamasın diye).
 - `removeTool`, silinen kaydın favori olup olmadığını `durum.undo.wasFavorite`
   içinde saklar; geri alma favoriyi de geri koyar (aksi hâlde kart geri gelir,
   favori sessizce kaybolurdu).
+- **Yükleme iptal edilebilir.** `loadTools` her çağrıldığında süren `GET /tools`
+  uçuşunu `abort()` eder; geç dönen eski yanıt yeni listeyi ezmez. İptal edilen
+  istek durumu değiştirmez — hata yazılmaz, liste boşaltılmaz. Ayrıntı:
+  `STATE_DIAGRAM.md` §5.
+- **Toplu ekleme uç noktası yoktur.** İçe aktarma her kayıt için ayrı bir `POST`
+  gönderir ve bunları **sırayla** yapar; kısmi başarı normaldir. Ayrıntı:
+  `IMPORT_REPORT.md`.
 
 ## Test
 

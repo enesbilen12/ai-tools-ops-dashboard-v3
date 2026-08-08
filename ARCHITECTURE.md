@@ -13,7 +13,7 @@ Her modülün tek cümlelik sorumluluğu:
 - **`src/constants.js`** — Sabit değerleri tutar (kategoriler, abonelik/durum seçenekleri, API adresi, localStorage anahtarları).
 
 ### API Katmanı
-- **`src/api/toolsApi.js`** — `db.json` ile HTTP üzerinden konuşarak araçları okuma/ekleme/güncelleme/silme (CRUD) işlemlerini yapar; her başarısızlığı `normalizeError` ile `status` + `url` taşıyan tek bir hata biçimine sokar.
+- **`src/api/toolsApi.js`** — `db.json` ile HTTP üzerinden konuşarak araçları okuma/ekleme/güncelleme/silme (CRUD) işlemlerini yapar; her başarısızlığı `normalizeError` ile `status` + `url` taşıyan tek bir hata biçimine sokar. `fetchTools` bir `AbortSignal` alabilir, böylece süren yükleme iptal edilebilir.
 
 > Uç noktalar, kayıt şeması, yumuşak silme sözleşmesi ve hata biçimi için:
 > **[`API_CONTRACT.md`](API_CONTRACT.md)**.
@@ -28,6 +28,8 @@ Her modülün tek cümlelik sorumluluğu:
 - **`src/components/dashboard.js`** — Diğer tüm bileşenleri bir araya getiren ana kapsayıcı; store'a abone olur ve genel yerleşimi çizer.
 - **`src/components/filters.js`** — Arama kutusu ile kategori, durum ve sıralama menülerini çizer, kullanıcı girdisini store'a iletir (arama 300 ms gecikmeli).
 - **`src/components/pagination.js`** — Izgaranın altındaki sayfa gezinme çubuğu; tek sayfaya sığan listelerde tamamen gizlenir.
+- **`src/components/stats.js`** — Sayfanın üstündeki dört sayı kutusu ve kategori dağılımı çubukları.
+- **`src/components/importPanel.js`** — JSON içe aktarma akışı: dosya seç → doğrula → önizleme → onay → sırayla ekle.
 - **`src/components/toolTable.js`** — Filtrelenmiş araç listesini kart ızgarası olarak çizer; kart aksiyonlarını (favori, düzenle, sil) ve kart gövdesine tıklamayı (detay çekmecesini açar) olay delegasyonuyla yürütür.
 - **`src/components/toolForm.js`** — **Tek** araç formunu üretir; `durum.editingId`'ye göre ekleme (POST) veya düzenleme (PATCH) modunda çalışır, girdiyi doğrular ve isteği store'a gönderir.
 - **`src/components/toolDrawer.js`** — Sağdan açılan salt-okunur detay çekmecesi; bir aracın tüm alanlarını (`id` dahil) gösterir ve favori/düzenle/sil kısayollarını sunar.
@@ -48,7 +50,10 @@ Her modülün tek cümlelik sorumluluğu:
 - **`src/utils/pagination.js`** — Sayfa sayısını hesaplar, sayfa numarasını geçerli aralığa sıkıştırır ve listeyi dilimler.
 - **`src/utils/urlState.js`** — Görünüm durumu (arama, kategori, durum, sıralama, sayfa) ile `URLSearchParams` arasında çeviri yapar; dışarıdan gelen değerleri doğrular.
 - **`src/utils/debounce.js`** — Art arda gelen çağrıları tek çağrıya indirger (arama kutusu).
-- **`src/utils/csv.js`** — Araç listesini CSV metnine dönüştürür ve dosya olarak indirir.
+- **`src/utils/csv.js`** — Araç listesini CSV metnine dönüştürür; `downloadFile` ile hem CSV hem JSON indirmesini yürütür.
+- **`src/utils/exporters.js`** — Listeyi içe aktarmaya uygun JSON metnine çevirir ve tarih damgalı dosya adı üretir.
+- **`src/utils/importer.js`** — İçe aktarma dosyasını çözümler ve kayıtları geçerli/geçersiz olarak ayırır (doğrulama `validators.js`'e devredilir).
+- **`src/utils/stats.js`** — Özet sayılarını ve kategori dağılımını hesaplar.
 - **`src/utils/formatters.js`** — Görüntüleme için metinleri biçimlendirir (rozet etiketleri, güvenli/escape edilmiş metin, tarih vb.).
 
 ## Veri Akışı (Data Flow)

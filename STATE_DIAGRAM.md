@@ -23,7 +23,8 @@ API sözleşmesi için: [`API_CONTRACT.md`](API_CONTRACT.md)
 | `editingId` | id \| null | `null` | `setEditing`, `editTool` (başarıda sıfırlar) | ✗ (geçici) |
 | `drawerId` | id \| null | `null` | `openDrawer`, `closeDrawer` | ✗ (geçici) |
 | `loading` | boolean | `false` | `loadTools` | ✗ |
-| `saving` | boolean | `false` | dört yazma aksiyonu | ✗ |
+| `saving` | boolean | `false` | yazma aksiyonları (`importTools` dahil) | ✗ |
+| `importProgress` | nesne \| null | `null` | `importTools` (her kayıttan sonra) | ✗ |
 | `undo` | nesne \| null | `null` | `removeTool`, `undoDelete`, `clearUndo` | ✗ |
 | `error` | metin | `''` | tüm API aksiyonları, `clearError` | ✗ |
 
@@ -60,9 +61,13 @@ activeTools()                   çöp kutusu dışarıda kalır
 sayısını bilmesi gerekiyor (`Sayfa 2 / 5 · 47 araç`). Kesme işlemi bileşende yapılınca
 hem tablo hem çubuk aynı filtrelenmiş listeyi görüyor.
 
-**Çöp menüsü ve CSV bu zincirden geçmez.** `deletedTools()` doğrudan `tools`'a bakar,
-CSV dışa aktarma ise `activeTools()`'u kullanır — dışa aktarılan dosya ekrandaki
-sayfayla değil, tüm aktif listeyle aynıdır.
+**Dışa aktarma `visibleTools()` noktasından beslenir** — yani filtreden geçmiş ve
+sıralanmış listenin **tamamı**, sayfalanmadan. Kullanıcı 2. sayfadayken de eşleşen
+bütün kayıtlar iner.
+
+**Çöp menüsü ve istatistikler bu zincirden geçmez.** `deletedTools()` doğrudan `tools`'a
+bakar; özet kutuları ve kategori dağılımı `activeTools()`'u kullanır — bunlar koleksiyonun
+tamamını anlatan bir özettir, o anki filtrenin sonucu değil.
 
 ## 3. Aksiyon → durum → yeniden çizim
 
@@ -111,7 +116,47 @@ yazımı bu yüzden son değerlerini saklar).
 `paginateTools` ayrıca **çizim anında** da kırpar: durumdaki sayfa bir an için eskise
 bile ekranda boş ızgara değil, mevcut son sayfa görünür.
 
-## 5. Adres çubuğu senkronu
+## 5. İptal edilebilir yükleme
+
+`loadTools()` modül düzeyinde tek bir `AbortController` tutar ve her çağrıda öncekini
+iptal eder.
+
+```
+loadTools()  ──► önceki kontrol varsa abort()
+      │
+      ├──► yeni AbortController; loading = true; bildir()
+      │
+      ▼
+  fetchTools(signal)
+      │
+      ├── başarı ──► tools = gelen, error = ''
+      │
+      ├── iptal  ──► HİÇBİR ŞEY YAPMA (return)
+      │               durumu artık yeni istek yönetiyor
+      │
+      └── hata   ──► tools = [], error = mesaj
+                          │
+                          ▼
+              finally: yalnızca GÜNCEL istek kapatır
+                       (loading = false, sayfa kırpılır, bildir())
+```
+
+**Neden gerekli:** "↻ Tekrar dene"ye üst üste basmak veya içe aktarma sonrası yenileme
+birden çok uçuş başlatır. İptal olmasaydı geç dönen eski yanıt yeni listeyi ezerdi.
+
+**İki incelik:**
+
+- **İptal edilen istek durumu değiştirmez.** `catch` bloğu `hata.aborted` ise sessizce
+  çekilir. Aksi hâlde iptal, listeyi boşaltıp ekrana "API'ye ulaşılamadı" yazardı —
+  oysa iptali uygulamanın kendisi istedi. Bu ayrım `normalizeError`'da yapılır:
+  `AbortError` → `status: -1`, `aborted: true`.
+- **`finally` yalnızca güncel istek için çalışır.** Eski uçuşun `finally`'si yeni
+  yüklemenin `loading` bayrağını düşürseydi, ekran veri gelmeden "boş liste" gösterirdi.
+
+Arama **iptal edilmez** çünkü ağa hiç istek gitmez: filtreleme bellekte yapılır
+(§2). İptal edilecek tek şey `GET /tools` uçuşudur.
+
+## 6. Adres çubuğu senkronu
 
 ```
    AÇILIŞTA (bir kez)                    HER DEĞİŞİMDE

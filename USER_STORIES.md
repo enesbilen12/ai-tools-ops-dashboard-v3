@@ -171,19 +171,27 @@ paneli göz konforuma göre kullanabileyim.
 
 ---
 
-## US-09 — CSV Dışa Aktarma
+## US-09 — Dışa Aktarma (CSV ve JSON)
 
-**Bir kullanıcı olarak**, araç listemi CSV dosyası olarak indirebilmek istiyorum ki
-verimi yedekleyebileyim veya bir tabloda açabileyim.
+**Bir kullanıcı olarak**, ekranda süzdüğüm listeyi dosya olarak indirebilmek istiyorum ki
+verimi yedekleyebileyim, bir tabloda açabileyim veya başka bir panele taşıyabileyim.
 
 ### Kabul Kriterleri
-- [ ] **"📤 CSV Dışa Aktar"** butonu bir `.csv` dosyası **indirir**.
-- [ ] Dosya yalnızca **aktif araçları** içerir (silinenler hariç).
-- [ ] Başlık satırı `CSV_COLUMNS` ile aynıdır; `id` ve `deleted` gibi **iç alanlar dışa aktarılmaz**.
-- [ ] Virgül, çift tırnak veya satır sonu içeren hücreler **RFC 4180**'e göre kaçırılır.
+- [ ] **"📤 CSV"** ve **"📤 JSON"** düğmeleri ilgili dosyayı **indirir**; dosya adı
+      tarih damgalıdır (`ai-araclari-2026-08-08.csv`).
+- [ ] Dosya **filtreden geçen tüm kayıtları** içerir — görünen sayfayı değil.
+      Kullanıcı 2. sayfadayken de eşleşen bütün kayıtlar iner (silinenler hariç).
+- [ ] Düğme etiketinde kaç kaydın ineceği yazar (`📤 CSV (47)`); sonuç yoksa kilitlidir.
+- [ ] Başlık satırı / JSON alanları `CSV_COLUMNS` ile aynıdır; `id` ve `deleted` gibi
+      **iç alanlar dışa aktarılmaz**.
+- [ ] Virgül, çift tırnak veya satır sonu içeren CSV hücreleri **RFC 4180**'e göre kaçırılır.
+- [ ] İndirilen JSON **doğrudan geri içe aktarılabilir** (US-16 ile round trip).
 
 > v3 değişikliği: v2'de bu özellik sayfa içi salt-okunur bir JSON textarea idi;
 > v3'te gerçek bir CSV dosya indirmesine dönüştü.
+>
+> v3 Gün 5 değişikliği: dışa aktarma tüm aktif araçları veriyordu; artık **ekrandaki
+> filtreyi** uyguluyor ve JSON biçimi de eklendi.
 
 ---
 
@@ -275,3 +283,67 @@ bağlantıyı paylaşabileyim ve sayfayı yenilediğimde aramamı kaybetmeyeyim.
 - [ ] Elle bozulmuş URL (`?page=abc&sort=xyz&status=Uydurma`) uygulamayı kırmaz; tanınmayan
       değerler sessizce varsayılana düşer.
 - [ ] URL'den gelen kategori, veri yüklenene kadar korunur (liste boşken `all`'a düşmez).
+
+---
+
+## US-15 — Panel İstatistikleri — *v3 Gün 5'te eklendi*
+
+**Bir kullanıcı olarak**, listemin genel görünümünü tek bakışta görmek istiyorum ki
+koleksiyonumun nasıl dağıldığını anlayabileyim.
+
+### Kabul Kriterleri
+- [ ] Sayfanın üstünde dört sayı gösterilir: **Toplam Araç**, **Durumu Aktif**,
+      **Favoriler**, **Kategori** sayısı.
+- [ ] "Toplam Araç" silinmemiş kayıtları, "Durumu Aktif" ise `status === 'Aktif'`
+      olanları sayar — ikisi farklı kavramdır ve etiketler bu farkı belli eder.
+- [ ] `status` alanı boş olan araçlar `Aktif` sayılır (US-03 ile aynı kural).
+- [ ] Altında **kategori dağılımı** çubuk olarak gösterilir: kategori adı, kayıt sayısı
+      ve yüzde. Çubuklar çoktan aza sıralıdır, eşitlikte Türkçe harf sırasına göre.
+- [ ] Sayılar **koleksiyonun tamamını** anlatır; o anki filtreye göre değişmez.
+- [ ] Her değer **metin olarak da** yazılıdır; bilgi yalnızca çubuk uzunluğuna bağlı
+      değildir (ekran okuyucu ve renk körlüğü için).
+- [ ] Çubuklar koyu temada da okunur; renk her iki temada da zemine karşı en az 3:1
+      kontrast taşır.
+
+---
+
+## US-16 — JSON İçe Aktarma — *v3 Gün 5'te eklendi*
+
+**Bir kullanıcı olarak**, hazır bir JSON dosyasından toplu araç ekleyebilmek istiyorum ki
+listemi elle tek tek doldurmak zorunda kalmayayım.
+
+### Kabul Kriterleri
+- [ ] **"📥 İçe Aktar"** düğmesi bir dosya seçici açar (`.json`).
+- [ ] Hem `[ … ]` hem `{ "tools": [ … ] }` kökü kabul edilir; panelden indirilen dosya
+      doğrudan kullanılabilir.
+- [ ] Bozuk JSON, dizi olmayan kök veya boş dosya **tek ve anlaşılır** bir hata gösterir;
+      hiçbir kayıt işlenmez.
+- [ ] Kayıtlar eklenmeden **önce önizleme** gösterilir: `✓ Geçerli (N)` ve
+      `✗ Geçersiz (M)`; geçersizlerde satır numarası ve sebep yazar.
+- [ ] Doğrulama **ekleme formuyla aynı kuralları** uygular (US-04).
+- [ ] Adı mevcut listede olan **ya da aynı dosyada tekrar eden** kayıt geçersiz sayılır ve
+      eklenmez; mevcut kaydın üzerine **yazılmaz**.
+- [ ] `id`, `deleted` ve tanınmayan alanlar atılır; listede olmayan
+      `subscription`/`status` varsayılana düşer ve kayıt geçerli kalır.
+- [ ] Ekleme yalnızca kullanıcı onayından sonra başlar; sürerken ilerleme gösterilir
+      (`12 / 47 eklendi`) ve düğmeler kilitlenir.
+- [ ] Bir kayıt başarısız olsa da **kalanlar denenir**; sonunda eklenen sayısı ve
+      eklenemeyenlerin sebebi gösterilir.
+- [ ] Panel `×`, `İptal` ve `Esc` ile kapanır.
+
+> Sözleşmenin tamamı: [`IMPORT_REPORT.md`](IMPORT_REPORT.md)
+
+---
+
+## US-17 — İptal Edilebilir Yükleme — *v3 Gün 5'te eklendi*
+
+**Bir kullanıcı olarak**, üst üste yenileme yaptığımda listenin bozulmamasını istiyorum
+ki geç dönen eski bir yanıt ekranı karıştırmasın.
+
+### Kabul Kriterleri
+- [ ] Yeni bir yükleme başladığında süren istek **iptal edilir** (`AbortController`).
+- [ ] İptal edilen istek **hata mesajı üretmez** ve listeyi boşaltmaz — kullanıcıya
+      "API'ye ulaşılamadı" denmez, çünkü iptali uygulama istemiştir.
+- [ ] "↻ Tekrar dene"ye üst üste basmak listeyi bozmaz.
+- [ ] Yalnızca **güncel** istek `loading` durumunu kapatır; iptal edilen eski uçuş
+      yeni yüklemenin yükleniyor göstergesini düşürmez.

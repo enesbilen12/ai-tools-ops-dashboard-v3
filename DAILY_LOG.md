@@ -4,6 +4,67 @@ Her gün ne yaptığımı kısaca not aldığım dosya. En yeni gün en üstte.
 
 ---
 
+## Gün 5
+
+- **Tarih:** 2026-08-08
+- **Bugünkü hedef:** İstatistikler, dışa/içe aktarma ve iptal edilebilir yükleme.
+- **Yaptığım değişiklikler:** Özet alanı iki sayıdan dört sayıya çıktı (Toplam
+  Araç, Durumu Aktif, Favoriler, Kategori) ve altına **kategori dağılımı**
+  çubukları geldi; hesap `utils/stats.js`'te saf fonksiyonda duruyor, çizim
+  `components/stats.js`'e taşındı. Dışa aktarma artık **filtreyi uyguluyor**:
+  CSV tüm aktif araçları veriyordu, şimdi ikisi de (CSV + yeni **JSON**)
+  `visibleTools()` kullanıyor — düğmede kaç kaydın ineceği yazıyor.
+  **JSON içe aktarma** eklendi: dosya seç → doğrula → önizleme (geçerli/geçersiz,
+  sebepleriyle) → onay → sırayla ekle. Doğrulama yeni kural yazmıyor, ekleme
+  formuyla aynı `validateForm`'u kullanıyor; tek ek kural dosyanın kendi içindeki
+  tekrar eden adlar. `loadTools` **AbortController** ile iptal edilebilir hâle
+  geldi. `IMPORT_REPORT.md` yazıldı.
+- **Değişen dosyalar:** src/api/toolsApi.js, src/state/store.js,
+  src/components/dashboard.js, src/components/{stats,importPanel}.js (yeni),
+  src/utils/csv.js, src/utils/{stats,exporters,importer}.js (yeni),
+  src/styles/{base,components}.css, tests/toolsApi.test.js,
+  tests/{stats,importer,exporters}.test.js (yeni), IMPORT_REPORT.md (yeni),
+  ARCHITECTURE.md, STATE_DIAGRAM.md, USER_STORIES.md, API_CONTRACT.md,
+  CRUD_MATRIX.md, CHANGELOG.md, TEST_REPORT.md
+- **Claude Code'a verdiğim ana prompt:** "Gün 5 görevleri: Dashboard istatistikleri ·
+  Export: filtrelenmiş veriyi JSON ve CSV olarak indir · Import: JSON seç, schema
+  doğrula, preview tabloda göster, onay sonrası ekle · AbortController ile yeni
+  aramada eski isteği iptal et · IMPORT_REPORT.md oluştur. Önce mevcut durumu
+  incele, plan ver, onayımı bekle."
+- **Test ettiklerim:** `npm test`; `npm run build`; store + json-server duman
+  testi (28 kontrol): istatistik tutarlılığı, üst üste `loadTools`'ta iptal,
+  karışık dosyanın geçerli/geçersiz ayrımı, sıralı eklemede ilerleme dalgası,
+  aynı dosyanın ikinci kez çift kayıt üretmemesi, **round trip** (dışa aktar →
+  sil → içe aktar) ve boş içe aktarma. Ayrıca çubuk renkleri `dataviz`
+  doğrulayıcısıyla ve gerçek kart zeminlerine karşı hesapla denetlendi.
+- **Geçen testler:** `npm test` **118/118** (Gün 4'teki 79'a 39 test eklendi).
+  Duman testi **28/28**. `npm run build` hatasız (30 modül, JS 31.02 kB /
+  gzip 9.87 kB). `db.json` 20 kayıtlık hâliyle korundu.
+- **Kalan sorunlar:** **Gün 5'in arayüzü tarayıcıda görülmedi** — dağılım
+  çubuklarının yerleşimi, içe aktarma panelinin önizleme/ilerleme/sonuç ekranları
+  ve dosyanın diske gerçekten inmesi yalnızca mantık düzeyinde doğrulandı.
+  `CRUD_MATRIX.md`'ye 13–18 numaralı senaryolar eklendi ama koşulmadı. Gün 1-2'den
+  devreden görsel maddeler hâlâ açık. Ayrıca içe aktarma her kayıt için ayrı bir
+  POST attığı için büyük dosyalarda yavaş; json-server toplu uç nokta sunmuyor.
+- **Bugün öğrendiğim kavram:** `AbortController` ve iptalin bir **arıza olmadığı**
+  — `AbortError`'ı ağ hatasından ayırmazsanız kullanıcıya "sunucu kapalı" dersiniz;
+  ayrıca yalnızca güncel isteğin `finally`'sinin durumu kapatması gerektiği
+  (yarış koşulu). Veri görselleştirmede **biçimin işten türediği**: dört başlık
+  sayısı grafik değil KPI kutusudur ve tek serilik bir büyüklük karşılaştırması
+  kategorik renk değil **tek hue** ister — renk bir şey kodlamıyorsa süstür.
+  Kontrastın göz kararı değil **hesapla** denetlenmesi gerektiği. Bir de içe
+  aktarmada doğrulamanın iki kaynağa (mevcut liste + dosyanın kendisi) karşı
+  yapılması gerektiği.
+- **Yarın yapacağım iş:** Gün 6 (planlanacak).
+- **Commit mesajları:** fix(api): tell a cancelled request apart from a dead
+  server · feat(state): cancel the in-flight load when a new one starts ·
+  feat(utils): compute dashboard stats · feat(utils): export filtered data as
+  json and csv · feat(import): validate and apply json files · feat(ui): show
+  stats, export buttons and the import panel · docs: document day 5 import,
+  export and stats
+
+---
+
 ## Gün 4
 
 - **Tarih:** 2026-08-08

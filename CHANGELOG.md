@@ -1,6 +1,47 @@
 # Değişiklik Günlüğü
 
-## Yayınlanmamış — 2026-08-08
+## Yayınlanmamış — 2026-08-08 (Gün 5)
+
+Gün 5: istatistikler, dışa/içe aktarma ve iptal edilebilir yükleme.
+
+### Eklendi
+- **Panel istatistikleri** — dört sayı (Toplam Araç, Durumu Aktif, Favoriler,
+  Kategori) ve **kategori dağılımı** çubukları. Dağılım tek serilik bir büyüklük
+  karşılaştırması olduğu için tek hue kullanılır; her kategoriye ayrı renk vermek
+  hiçbir şey kodlamazdı. Açık ve koyu tema için ayrı renk adımları seçildi
+  (ters çevirme değil), ikisi de kendi zeminine karşı 3:1 kontrastı geçiyor.
+  Her değer metin olarak da yazılı — bilgi yalnızca çubuk uzunluğuna bağlı değil.
+- **JSON dışa aktarma** — CSV ile aynı alanlar; indirilen dosya **doğrudan geri
+  içe aktarılabilir**. Dosya adları tarih damgalı (`ai-araclari-2026-08-08.json`).
+- **JSON içe aktarma** — dosya seç → doğrula → **önizleme** (geçerli/geçersiz,
+  sebepleriyle) → onay → sırayla ekle. Doğrulama ekleme formuyla aynı kuralları
+  kullanır; çakışan ve dosya içinde tekrar eden adlar atlanır, üzerine yazılmaz.
+  json-server'da toplu uç nokta olmadığı için kayıtlar tek tek gönderilir ve
+  ilerleme gösterilir (`12 / 47 eklendi`).
+- **`IMPORT_REPORT.md`** — dosya sözleşmesi, doğrulama sebepleri, çakışma
+  politikası, kısmi başarı davranışı ve sınırlar.
+- Yeni saf modüller: `utils/stats.js`, `utils/exporters.js`, `utils/importer.js`;
+  yeni bileşenler: `components/stats.js`, `components/importPanel.js`.
+- **US-15 / US-16 / US-17** (`USER_STORIES.md`) — istatistikler, içe aktarma,
+  iptal edilebilir yükleme.
+
+### Değişti
+- **Dışa aktarma artık filtreyi uyguluyor.** CSV tüm aktif araçları veriyordu;
+  şimdi ikisi de `visibleTools()` kullanıyor — filtreden geçen tüm kayıtlar,
+  sayfalanmadan. Düğme etiketinde kaç kaydın ineceği yazıyor (`📤 CSV (47)`).
+- `loadTools` **iptal edilebilir**: her çağrı süren `GET /tools` uçuşunu
+  `abort()` eder. "↻ Tekrar dene"ye üst üste basmak veya içe aktarma sonrası
+  yenileme, geç dönen eski bir yanıtın yeni listeyi ezmesine yol açıyordu.
+- Özet alanı `dashboard.js` içinden `components/stats.js`'e taşındı.
+- `downloadCSV`'nin blob/anchor mantığı `downloadFile` olarak ortaklaştırıldı.
+
+### Düzeltildi
+- **İptal edilen istek artık sunucu arızası gibi görünmüyor.** `AbortError`
+  `normalizeError`'da `status: 0`'a düşüp "API'ye ulaşılamadı. json-server
+  çalışıyor mu?" mesajını üretiyordu — oysa iptali uygulamanın kendisi istemişti.
+  Artık `status: -1` + `aborted: true` ile ayrılıyor ve durumu hiç değiştirmiyor.
+
+## Yayınlanmamış — 2026-08-08 (Gün 4)
 
 Gün 4: sıralama, sayfalama ve adres çubuğunda saklanan görünüm.
 

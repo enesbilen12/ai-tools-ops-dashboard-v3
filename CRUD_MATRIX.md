@@ -1,9 +1,9 @@
 # CRUD Matrisi — Manuel Test Senaryoları
 
-Gün 3'te gelen tam CRUD akışının (tek form, detay çekmecesi, geri alma toast'ı)
-tarayıcıda elle geçilecek kabul listesi.
+Panelin veri akışlarının tarayıcıda elle geçilecek kabul listesi.
 
-**Son koşu:** 2026-08-04 · tarayıcıda elle · **12/12 geçti**
+**Son koşu:** 2026-08-04 · CRUD bölümü (1–12) · **12/12 geçti**
+**Bekleyen:** veri aktarımı bölümü (13–18) — Gün 5'te eklendi, henüz koşulmadı.
 
 **Hazırlık**
 
@@ -15,6 +15,10 @@ npm run dev    # Vite :5173
 DevTools **Network** sekmesi açık olsun: her senaryonun beklenen HTTP isteği
 sütunda yazıyor. **Hiçbir senaryoda `DELETE` görünmemeli** — silme yumuşaktır
 (`API_CONTRACT.md`).
+
+> **Uyarı:** 13–18 arası senaryolar `db.json`'a gerçek kayıt ekler. Koşudan önce
+> dosyayı yedekleyin (`cp db.json db.backup.json`) ya da sonrasında eklenen
+> kayıtları çöp menüsünden temizleyin.
 
 **Sonuç sütunu:** ✅ geçti · ❌ kaldı · — henüz koşulmadı.
 
@@ -59,7 +63,21 @@ sütunda yazıyor. **Hiçbir senaryoda `DELETE` görünmemeli** — silme yumuş
 Bu matris **arayüz davranışını** ölçer. Aynı akışların mantık tarafı tarayıcısız
 olarak zaten doğrulandı:
 
-- `npx vitest run` — 34 birim testi (`TEST_REPORT.md` §1)
-- store + json-server duman testi — 28 kontrol (`TEST_REPORT.md` §3c): `saving`
-  dalgası, `undo` kaydı, favori hatırlama/geri getirme, `clearUndo`'nun kaydı
-  yok etmemesi, ad çakışmasında geri almanın engellenmesi
+- `npx vitest run` — 118 birim testi (`TEST_REPORT.md` §1)
+- store + json-server duman testleri (`TEST_REPORT.md` §3c–3e): CRUD ve geri alma
+  (28 kontrol), sıralama/sayfalama/URL (29), içe-dışa aktarma ve iptal (28)
+
+---
+
+## Veri aktarımı (Gün 5'te eklendi)
+
+Bu bölüm henüz elle koşulmadı.
+
+| # | Senaryo | Adımlar | Beklenen | HTTP | Sonuç |
+|---|---|---|---|---|---|
+| 13 | **Dışa aktarma filtreyi uygular** | Kategori filtresi seç → sayfa 2'ye geç → "📤 CSV" | Düğmede eşleşen sayı yazar; inen dosya **görünen sayfayı değil, eşleşen tüm kayıtları** içerir; `id`/`deleted` sütunu yok | — | — |
+| 14 | **JSON round trip** | "📤 JSON" ile indir → bir aracı sil → "📥 İçe Aktar" ile aynı dosyayı seç | Silinen kayıt önizlemede "geçerli", diğerleri "bu ad zaten var" ile geçersiz; onaydan sonra yalnızca eksik kayıt eklenir | `POST /tools` → `201` | — |
+| 15 | **Bozuk dosya** | Bozuk JSON, dizi olmayan JSON ve boş dosya (`[]`) ile içe aktarmayı dene | Üçünde de tek ve anlaşılır hata; **hiç istek gitmez**, liste değişmez | — | — |
+| 16 | **Karışık dosya önizlemesi** | Geçerli + çakışan ad + bozuk url içeren dosya seç | `✓ Geçerli (N)` / `✗ Geçersiz (M)` bölümleri; geçersizlerde satır numarası ve sebep; onay düğmesinde `N kaydı ekle` | — | — |
+| 17 | **İçe aktarma ilerlemesi** | Çok kayıtlı dosyayı onayla | Düğme `x / N eklendi…` diye ilerler ve kilitli kalır; bitince eklenen sayısı görünür; ızgara yeni kartlarla dolar | N adet `POST` | — |
+| 18 | **İptal edilebilir yükleme** | json-server'ı durdur → "↻ Tekrar dene"ye hızlıca 3-4 kez bas → sunucuyu aç → tekrar dene | Liste bozulmaz, çift istek üst üste binmez; **"İstek iptal edildi." kullanıcıya gösterilmez**; sunucu gelince liste düzgün yüklenir | iptal edilen `GET`'ler | — |
