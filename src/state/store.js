@@ -50,6 +50,9 @@ const durum = {
   // alma bunu kullanır. Süre dolunca yalnızca bu alan temizlenir — kayıt
   // db.json'da `deleted: true` olarak durmaya devam eder.
   undo: null,
+  // İçe aktarma sürerken { done, total }; bitince null. Toplu uç nokta
+  // olmadığı için kayıtlar tek tek eklenir ve ilerleme gösterilir.
+  importProgress: null,
   // Kullanıcıya gösterilecek son hata metni (json-server kapalıysa vb.).
   error: '',
 };
@@ -205,6 +208,53 @@ export async function addTool(veri) {
     durum.saving = false;
     bildir();
   }
+}
+
+// importTools: doğrulanmış kayıtları sırayla ekler (US-16).
+//
+// json-server'da toplu uç nokta yoktur; her kayıt ayrı bir POST'tur. Sıralı
+// gönderilir çünkü paralel istekler ilerlemeyi raporlanamaz kılar. Bir kayıt
+// başarısız olsa da kalanlar denenir — kısmi başarı normaldir ve dönen rapor
+// bunu ayrıntısıyla taşır (IMPORT_REPORT.md).
+//
+// Dönüş: { added, failed: [{ name, message }] }
+export async function importTools(kayitlar = []) {
+  if (kayitlar.length === 0) return { added: 0, failed: [] };
+
+  durum.saving = true;
+  durum.importProgress = { done: 0, total: kayitlar.length };
+  durum.error = '';
+  bildir();
+
+  const basarisiz = [];
+  let eklenen = 0;
+
+  try {
+    for (const kayit of kayitlar) {
+      try {
+        const olusan = await createTool({
+          ...kayit,
+          status: kayit.status || DEFAULT_STATUS,
+        });
+        durum.tools.push(olusan);
+        eklenen += 1;
+      } catch (hata) {
+        basarisiz.push({ name: kayit.name, message: hata.message });
+      }
+      // İlerleme her kayıttan sonra bildirilir ki çubuk ilerlesin.
+      durum.importProgress = { done: eklenen + basarisiz.length, total: kayitlar.length };
+      bildir();
+    }
+  } finally {
+    durum.importProgress = null;
+    durum.saving = false;
+    // Eklenen kayıtlar sayfa sayısını artırmış olabilir; sayfa yine de
+    // geçerli aralıkta kalmalı.
+    durum.page = clampPage(durum.page, visibleTools().length, durum.pageSize);
+    bildir();
+  }
+
+  return { added: eklenen, failed: basarisiz };
 }
 
 // editTool: mevcut aracı günceller. Ad değiştiyse favori kaydını yeni ada taşır
