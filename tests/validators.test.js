@@ -58,4 +58,64 @@ describe('validateForm', () => {
     expect(validateForm({ ...gecerli, url: 'http://x.co' }, mevcut).url).toBeUndefined();
     expect(validateForm({ ...gecerli, url: 'https://x.co' }, mevcut).url).toBeUndefined();
   });
+
+  it('şema büyük harfle yazılsa da kabul edilir', () => {
+    expect(validateForm({ ...gecerli, url: 'HTTPS://X.CO' }, mevcut).url).toBeUndefined();
+  });
+
+  it('şema benzeri ama geçersiz adresler reddedilir', () => {
+    ['//x.co', 'javascript:alert(1)', 'httpss://x.co', 'http:/x.co'].forEach((url) => {
+      expect(validateForm({ ...gecerli, url }, mevcut).url).toBeDefined();
+    });
+  });
+
+  it('baştaki/sondaki boşluk kırpılır, adres geçerli sayılır', () => {
+    expect(validateForm({ ...gecerli, url: '  https://x.co  ' }, mevcut).url).toBeUndefined();
+  });
+});
+
+// --- Sınır ve hatalı tip senaryoları (Gün 6) ---
+
+describe('validateForm — boş ve hatalı girdiler', () => {
+  // K4: doğrulayıcı kendi başına trim etmiyordu; yalnızca çağıranların
+  // .trim() yapması sayesinde kurtuluyordu.
+  it('yalnızca boşluktan oluşan zorunlu alanlar reddedilir', () => {
+    const hatalar = validateForm(
+      { name: '   ', category: '\t', purpose: '  ', url: '  ' },
+      mevcut
+    );
+    expect(hatalar.name).toBeDefined();
+    expect(hatalar.category).toBeDefined();
+    expect(hatalar.purpose).toBeDefined();
+    expect(hatalar.url).toBeDefined();
+  });
+
+  it('boşluklu ad, kırpılmış hâliyle çakışma sayılır', () => {
+    expect(validateForm({ ...gecerli, name: '  ChatGPT  ' }, mevcut).name).toBeDefined();
+  });
+
+  it('alanları hiç olmayan nesne çökertmeden dört hata verir', () => {
+    const hatalar = validateForm({}, mevcut);
+    expect(Object.keys(hatalar).sort()).toEqual(['category', 'name', 'purpose', 'url']);
+  });
+
+  it('argümansız çağrı çökmez', () => {
+    expect(() => validateForm()).not.toThrow();
+    expect(isValid(validateForm())).toBe(false);
+  });
+
+  // K3: db.json elle düzenlenip bir kayıttan name düşerse ekleme formu
+  // tamamen kilitleniyordu (TypeError).
+  it('mevcut listede adsız kayıt varsa çökmez', () => {
+    expect(() => validateForm(gecerli, [{ id: 1 }, { id: 2, name: null }])).not.toThrow();
+    expect(isValid(validateForm(gecerli, [{ id: 1 }]))).toBe(true);
+  });
+
+  it('existingTools verilmezse benzersizlik kontrolü atlanır', () => {
+    expect(isValid(validateForm(gecerli))).toBe(true);
+  });
+
+  it('listede olmayan bir currentId benzersizliği gevşetmez', () => {
+    expect(validateForm({ ...gecerli, name: 'ChatGPT' }, mevcut, 999).name).toBeDefined();
+  });
 });
