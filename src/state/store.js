@@ -8,6 +8,7 @@
 // Bileşenler api'yi doğrudan çağırmaz; her zaman buradan geçer.
 
 import { STORAGE_KEYS, DEFAULT_STATUS } from '../constants.js';
+import { esitMetin } from '../utils/text.js';
 import { filterTools } from '../utils/filters.js';
 import { sortTools, isSortOption, DEFAULT_SORT } from '../utils/sorting.js';
 import { clampPage, DEFAULT_PAGE_SIZE } from '../utils/pagination.js';
@@ -334,9 +335,9 @@ export async function restoreTool(id) {
   const arac = aracBul(id);
   if (!arac) return { ok: false, message: 'Araç bulunamadı.' };
 
-  const cakisiyor = activeTools().some(
-    (a) => a.name.toLowerCase() === arac.name.toLowerCase()
-  );
+  // Çakışma kontrolü Türkçeye uygun yapılır: "İzleme" ile "izleme" aynı addır
+  // (utils/text.js). Aksi hâlde geri yükleme benzersizliği bozabilirdi.
+  const cakisiyor = activeTools().some((a) => esitMetin(a.name, arac.name));
   if (cakisiyor) {
     return {
       ok: false,

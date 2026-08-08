@@ -119,3 +119,36 @@ describe('validateForm — boş ve hatalı girdiler', () => {
     expect(validateForm({ ...gecerli, name: 'ChatGPT' }, mevcut, 999).name).toBeDefined();
   });
 });
+
+// K1: JavaScript'in toLowerCase'i Türkçe İ/ı için yanlış sonuç veriyor —
+// "İzleme".toLowerCase() "i̇zleme" (i + birleşen nokta) üretir ve "izleme"ye
+// eşit olmaz. Bu yüzden aynı ad iki kez eklenebiliyordu.
+describe('validateForm — Türkçe harf duyarsızlığı', () => {
+  const turkce = [
+    { id: 1, name: 'İzleme' },
+    { id: 2, name: 'Ölçüm' },
+    { id: 3, name: 'ŞEMA' },
+  ];
+
+  it('İ ile i aynı ad sayılır', () => {
+    expect(validateForm({ ...gecerli, name: 'izleme' }, turkce).name).toBeDefined();
+    expect(validateForm({ ...gecerli, name: 'İZLEME' }, turkce).name).toBeDefined();
+  });
+
+  it('ı ile I aynı ad sayılır', () => {
+    expect(validateForm({ ...gecerli, name: 'ışık' }, [{ id: 1, name: 'IŞIK' }]).name).toBeDefined();
+  });
+
+  it('Ö/ö ve Ş/ş aynı ad sayılır', () => {
+    expect(validateForm({ ...gecerli, name: 'ölçüm' }, turkce).name).toBeDefined();
+    expect(validateForm({ ...gecerli, name: 'şema' }, turkce).name).toBeDefined();
+  });
+
+  it('gerçekten farklı Türkçe adlar çakışmaz', () => {
+    expect(validateForm({ ...gecerli, name: 'Ölçek' }, turkce).name).toBeUndefined();
+  });
+
+  it('düzenlemede Türkçe kendi adı hariç tutulur', () => {
+    expect(validateForm({ ...gecerli, name: 'İzleme' }, turkce, 1).name).toBeUndefined();
+  });
+});

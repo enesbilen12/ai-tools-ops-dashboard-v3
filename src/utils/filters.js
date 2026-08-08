@@ -2,9 +2,11 @@
 // v2'deki aracFiltreyeUyuyor / applyFilters mantığının taşınmış hâli.
 
 import { DEFAULT_STATUS } from '../constants.js';
+import { icerirMetin } from './text.js';
 
 // toolMatches: araç, arama metnine VE kategoriye VE duruma birden uyuyor mu?
-// - Arama: name + category + purpose üzerinde, büyük/küçük harf duyarsız.
+// - Arama: name + category + purpose üzerinde, Türkçeye uygun harf duyarsız
+//   karşılaştırmayla (utils/text.js) — "izleme" araması "İzleme"yi bulur.
 // - Kategori: "all" ise herkes geçer, yoksa tam eşleşme.
 // - Durum: "all" ise herkes geçer; status yoksa DEFAULT_STATUS kabul edilir.
 export function toolMatches(tool = {}, { search = '', category = 'all', status = 'all' } = {}) {
@@ -12,9 +14,8 @@ export function toolMatches(tool = {}, { search = '', category = 'all', status =
   // metnine çevirdiği için "undefined" araması eksik alanlı her aracı buluyordu.
   const haystack = [tool.name, tool.category, tool.purpose]
     .map((alan) => alan ?? '')
-    .join(' ')
-    .toLowerCase();
-  const textOk = haystack.includes(search.toLowerCase());
+    .join(' ');
+  const textOk = icerirMetin(haystack, search);
   const categoryOk = category === 'all' || tool.category === category;
   const toolStatus = tool.status || DEFAULT_STATUS;
   const statusOk = status === 'all' || toolStatus === status;

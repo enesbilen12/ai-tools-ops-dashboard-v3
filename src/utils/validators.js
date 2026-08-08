@@ -10,6 +10,8 @@
 //
 // Dönüş: hataların { alan: mesaj } nesnesi. Boş nesne => geçerli.
 
+import { esitMetin } from './text.js';
+
 // zorunlu: alan dolu mu? Kırpma burada yapılır — çağıranın trim etmesine
 // güvenilmez, aksi hâlde yalnızca boşluktan oluşan bir ad geçerli sayılırdı.
 function zorunlu(deger) {
@@ -25,14 +27,15 @@ export function validateForm(data = {}, existingTools = [], currentId = null) {
   const url = zorunlu(data.url);
 
   // Ad: zorunlu ve aynı adlı BAŞKA aktif araç olamaz.
-  // Listedeki kaydın adı eksik olabilir (db.json elle düzenlenmişse); String()
-  // olmadan bu çağrı TypeError ile çöküyor ve formu tamamen kilitliyordu.
+  // Karşılaştırma Türkçeye uygun yapılır (İzleme ile izleme aynı addır);
+  // esitMetin ayrıca adı eksik kayıtlara karşı da korur (db.json elle
+  // düzenlenmişse), aksi hâlde bu çağrı TypeError ile çöküyordu.
   if (!name) {
     errors.name = 'Ad alanı zorunludur.';
   } else if (
     existingTools.some(
       (t) =>
-        String(t?.name ?? '').toLowerCase() === name.toLowerCase() &&
+        esitMetin(t?.name, name) &&
         (currentId == null || String(t?.id) !== String(currentId))
     )
   ) {

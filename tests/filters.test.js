@@ -103,3 +103,28 @@ describe('filterTools — sınırlar', () => {
     expect(araclar).toEqual(kopya);
   });
 });
+
+// K1'in arama tarafı: "izleme" araması "İzleme" adlı aracı bulmuyordu.
+describe('toolMatches — Türkçe harf duyarsızlığı', () => {
+  const izleme = { name: 'İzleme', category: 'Araştırma', purpose: 'takip' };
+
+  it('İ ile başlayan adı küçük harfle arayınca bulur', () => {
+    expect(toolMatches(izleme, { search: 'izleme' })).toBe(true);
+  });
+
+  it('büyük harfle arayınca da bulur', () => {
+    expect(toolMatches(izleme, { search: 'İZLEME' })).toBe(true);
+  });
+
+  it('ı/I ayrımını gözetmez', () => {
+    expect(toolMatches({ name: 'IŞIK' }, { search: 'ışık' })).toBe(true);
+  });
+
+  it('Türkçe kategoride de çalışır', () => {
+    expect(toolMatches(izleme, { search: 'araştırma' })).toBe(true);
+  });
+
+  it('gerçekten eşleşmeyen metin bulunmaz', () => {
+    expect(toolMatches(izleme, { search: 'video' })).toBe(false);
+  });
+});
