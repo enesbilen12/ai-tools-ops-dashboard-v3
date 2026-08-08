@@ -32,15 +32,22 @@ export function toolsToCSV(tools, columns = CSV_COLUMNS) {
   return [header, ...rows].join('\n');
 }
 
-// downloadCSV: verilen CSV metnini bir dosya olarak indirir (tarayıcıda).
-export function downloadCSV(csv, filename = 'ai-araclari.csv') {
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+// downloadFile: verilen metni bir dosya olarak indirir (tarayıcıda).
+// CSV ve JSON dışa aktarma aynı blob + <a> + revokeObjectURL adımlarını
+// kullandığı için tek yerde durur.
+export function downloadFile(icerik, dosyaAdi, mime = 'text/plain;charset=utf-8;') {
+  const blob = new Blob([icerik], { type: mime });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = filename;
+  link.download = dosyaAdi;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+}
+
+// downloadCSV: CSV metnini .csv dosyası olarak indirir.
+export function downloadCSV(csv, filename = 'ai-araclari.csv') {
+  downloadFile(csv, filename, 'text/csv;charset=utf-8;');
 }
