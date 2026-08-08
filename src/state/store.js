@@ -58,6 +58,15 @@ const durum = {
   error: '',
 };
 
+// Silinen araçların silinme anındaki favori durumu: id -> true.
+//
+// `durum.undo` yalnızca 5 saniye yaşıyor (toast kapanınca temizleniyor). Favori
+// bilgisi orada tutulduğunda, süre dolduktan sonra ÇÖP MENÜSÜNDEN geri yükleyen
+// kullanıcı favorisini sessizce kaybediyordu — toast'tan geri alan kaybetmiyordu.
+// İki geri yükleme yolu aynı sonucu versin diye bilgi burada, kaydın ömrü
+// boyunca tutulur.
+const silinenFavoriler = new Map();
+
 // --- ABONELİK ---
 
 const aboneler = new Set();
@@ -309,6 +318,9 @@ export async function removeTool(id) {
       durum.favorites = durum.favorites.filter((ad) => ad !== arac.name);
       favorileriKaydet();
     }
+    // Toast'ın 5 saniyesinden bağımsız olarak saklanır; çöp menüsünden geri
+    // yükleme de favoriyi geri koyabilsin diye.
+    if (favoriydi) silinenFavoriler.set(String(arac.id), true);
 
     durum.undo = { id: arac.id, name: arac.name, wasFavorite: favoriydi };
     // Silinen kart düzenleniyorsa veya çekmecesi açıksa arkada kalmasın.
@@ -325,6 +337,18 @@ export async function removeTool(id) {
   } finally {
     durum.saving = false;
     bildir();
+  }
+}
+
+// favoriyiGeriYukle: kayıt silinmeden önce favoriyse favori listesine geri koyar.
+// Ad değişmiş olabileceği için kaydın GÜNCEL adı kullanılır.
+function favoriyiGeriYukle(arac) {
+  const anahtar = String(arac.id);
+  if (!silinenFavoriler.has(anahtar)) return;
+  silinenFavoriler.delete(anahtar);
+  if (!durum.favorites.includes(arac.name)) {
+    durum.favorites = [...durum.favorites, arac.name];
+    favorileriKaydet();
   }
 }
 
@@ -351,6 +375,9 @@ export async function restoreTool(id) {
   try {
     await apiRestoreTool(id);
     arac.deleted = false;
+    // Silinmeden önce favoriyse favori kaydı da geri gelir — hangi yoldan
+    // (toast ya da çöp menüsü) geri yüklendiğinden bağımsız olarak.
+    favoriyiGeriYukle(arac);
     durum.error = '';
     return { ok: true };
   } catch (hata) {
@@ -369,15 +396,10 @@ export async function undoDelete() {
   const kayit = durum.undo;
   if (!kayit) return { ok: false, message: 'Geri alınacak bir silme yok.' };
 
+  // Favoriyi restoreTool geri koyar (her iki geri yükleme yolu aynı davransın
+  // diye mantık orada tek yerde durur); burada yalnızca kısayol kapatılır.
   const sonuc = await restoreTool(kayit.id);
   if (!sonuc.ok) return sonuc;
-
-  // Ad, geri yükleme sonrası kaydın kendi üzerinden okunur.
-  const ad = aracBul(kayit.id)?.name ?? kayit.name;
-  if (kayit.wasFavorite && !durum.favorites.includes(ad)) {
-    durum.favorites = [...durum.favorites, ad];
-    favorileriKaydet();
-  }
 
   durum.undo = null;
   bildir();
