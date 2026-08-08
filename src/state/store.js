@@ -8,6 +8,9 @@
 // Bileşenler api'yi doğrudan çağırmaz; her zaman buradan geçer.
 
 import { STORAGE_KEYS, DEFAULT_STATUS } from '../constants.js';
+import { filterTools } from '../utils/filters.js';
+import { sortTools, isSortOption, DEFAULT_SORT } from '../utils/sorting.js';
+import { clampPage, DEFAULT_PAGE_SIZE } from '../utils/pagination.js';
 import {
   fetchTools,
   createTool,
@@ -22,6 +25,13 @@ const durum = {
   // db.json'daki TÜM araçlar (silinenler de dahil). Ayrım `deleted` alanıyla yapılır.
   tools: [],
   filters: { search: '', category: 'all', status: 'all' },
+  // Sıralama seçeneği (utils/sorting.js -> SORT_OPTIONS).
+  sort: DEFAULT_SORT,
+  // Görüntülenen sayfa (1'den başlar) ve sayfa başına kart sayısı.
+  // Filtre veya sıralama değişince page 1'e döner: kullanıcı 3. sayfadayken
+  // filtreleyince sonuç dışı bir sayfada kalmasın.
+  page: 1,
+  pageSize: DEFAULT_PAGE_SIZE,
   // Favoriler araç ADINA göre tutulur (v2 ile aynı). Bu yüzden yeniden
   // adlandırmada favori kaydının yeni ada taşınması gerekir (renameFavorite).
   favorites: [],
@@ -73,6 +83,13 @@ export function activeTools() {
 // Çöp kutusu: yumuşak silinmiş araçlar.
 export function deletedTools() {
   return durum.tools.filter((arac) => arac.deleted === true);
+}
+
+// visibleTools: ekranda gösterilecek listenin sayfalanmamış hâli —
+// aktif araçlar, filtreden geçmiş ve sıralanmış. Sayfalama bileşende yapılır
+// ki toolTable ve pagination toplam sayıyı da bilsin.
+export function visibleTools() {
+  return sortTools(filterTools(activeTools(), durum.filters), durum.sort);
 }
 
 export function isFavorite(isim) {
@@ -145,6 +162,9 @@ export async function loadTools() {
     durum.error = hata.message;
   } finally {
     durum.loading = false;
+    // URL'den gelen sayfa numarası veri gelmeden doğrulanamıyordu; liste
+    // elde olduğuna göre şimdi sınırlanır (ör. ?page=99 -> son sayfa).
+    durum.page = clampPage(durum.page, visibleTools().length, durum.pageSize);
     bildir();
   }
 }
@@ -225,6 +245,9 @@ export async function removeTool(id) {
     // Silinen kart düzenleniyorsa veya çekmecesi açıksa arkada kalmasın.
     if (String(durum.editingId) === String(arac.id)) durum.editingId = null;
     if (String(durum.drawerId) === String(arac.id)) durum.drawerId = null;
+    // Son sayfadaki tek kart silindiyse o sayfa artık yok; boş ızgara yerine
+    // bir önceki sayfaya düşülür.
+    durum.page = clampPage(durum.page, visibleTools().length, durum.pageSize);
     durum.error = '';
     return true;
   } catch (hata) {
@@ -325,14 +348,51 @@ export function renameFavorite(eskiAd, yeniAd) {
 
 // --- AKSİYONLAR: filtreler ve düzenleme modu ---
 
+// setFilter / resetFilters / setSort sayfayı 1'e döndürür: filtre daraldığında
+// kullanıcının bulunduğu sayfa sonuç listesinin dışında kalabilir.
 export function setFilter(alan, deger) {
   if (!(alan in durum.filters)) return;
+  if (durum.filters[alan] === deger) return; // gereksiz çizim ve sayfa sıfırlaması olmasın
   durum.filters[alan] = deger;
+  durum.page = 1;
   bildir();
 }
 
 export function resetFilters() {
   durum.filters = { search: '', category: 'all', status: 'all' };
+  durum.page = 1;
+  bildir();
+}
+
+// --- AKSİYONLAR: sıralama ve sayfalama ---
+
+// setSort: tanınmayan değer varsayılana düşer (URL elle düzenlenebilir).
+export function setSort(deger) {
+  const yeni = isSortOption(deger) ? deger : DEFAULT_SORT;
+  if (durum.sort === yeni) return;
+  durum.sort = yeni;
+  durum.page = 1;
+  bildir();
+}
+
+// setPage: sayfa numarası mevcut sonuç sayısına göre sınırlanır.
+export function setPage(no) {
+  const yeni = clampPage(no, visibleTools().length, durum.pageSize);
+  if (durum.page === yeni) return;
+  durum.page = yeni;
+  bildir();
+}
+
+// applyUrlState: adres çubuğundan okunan görünümü uygular (açılışta bir kez).
+// Tek bir bildirim yapar; alan alan setFilter çağırmak birden çok çizim ve
+// aradaki sayfa sıfırlamaları yüzünden URL'deki sayfayı kaybettirirdi.
+export function applyUrlState({ filters, sort, page } = {}) {
+  if (filters) durum.filters = { ...durum.filters, ...filters };
+  if (sort !== undefined) durum.sort = isSortOption(sort) ? sort : DEFAULT_SORT;
+  if (page !== undefined) {
+    const no = Math.floor(Number(page));
+    durum.page = Number.isFinite(no) && no > 0 ? no : 1;
+  }
   bildir();
 }
 
