@@ -145,8 +145,18 @@ function temayiKaydet() {
 // loadTools: açılışta bir kez çalışır. Favorileri localStorage'dan, araçları
 // json-server'dan alır. API kapalıysa durum.error doldurulur (boş ekran yerine
 // kullanıcıya sebebi gösterilsin diye).
+// Süren yükleme isteğinin denetleyicisi. Yeni bir yükleme başlarken önceki
+// iptal edilir: "↻ Tekrar dene"ye üst üste basmak veya içe aktarma sonrası
+// yenileme, geç dönen eski bir yanıtın yeni listeyi ezmesine yol açardı.
+let yuklemeKontrolu = null;
+
 export async function loadTools() {
   durum.favorites = favorileriYukle();
+
+  yuklemeKontrolu?.abort();
+  const kontrol = new AbortController();
+  yuklemeKontrolu = kontrol;
+
   // Önce yükleniyor durumuna geç: aksi hâlde veri gelene kadar ekranda boş
   // liste mesajı ("Araç bulunamadı.") görünür ve yanıltıcı olur.
   durum.loading = true;
@@ -154,18 +164,26 @@ export async function loadTools() {
   bildir();
 
   try {
-    const gelen = await fetchTools();
+    const gelen = await fetchTools(kontrol.signal);
     durum.tools = Array.isArray(gelen) ? gelen : [];
     durum.error = '';
   } catch (hata) {
+    // İptal edilen istek durumu DEĞİŞTİRMEZ: listeyi boşaltmak ve hata yazmak
+    // yerine sessizce çekilir; ekranı artık yeni istek yönetiyor.
+    if (hata.aborted) return;
     durum.tools = [];
     durum.error = hata.message;
   } finally {
-    durum.loading = false;
-    // URL'den gelen sayfa numarası veri gelmeden doğrulanamıyordu; liste
-    // elde olduğuna göre şimdi sınırlanır (ör. ?page=99 -> son sayfa).
-    durum.page = clampPage(durum.page, visibleTools().length, durum.pageSize);
-    bildir();
+    // Yalnızca güncel istek durumu kapatabilir; iptal edilen eski uçuşun
+    // finally'si yeni yüklemenin `loading` bayrağını düşürmemeli.
+    if (yuklemeKontrolu === kontrol) {
+      yuklemeKontrolu = null;
+      durum.loading = false;
+      // URL'den gelen sayfa numarası veri gelmeden doğrulanamıyordu; liste
+      // elde olduğuna göre şimdi sınırlanır (ör. ?page=99 -> son sayfa).
+      durum.page = clampPage(durum.page, visibleTools().length, durum.pageSize);
+      bildir();
+    }
   }
 }
 
