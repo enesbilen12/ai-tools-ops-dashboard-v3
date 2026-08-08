@@ -47,4 +47,59 @@ describe('uniqueCategories', () => {
   it('benzersiz kategorileri döndürür', () => {
     expect(uniqueCategories(araclar).sort()).toEqual(['Görsel', 'Kod', 'Metin']);
   });
+
+  it('tekrar eden kategoriyi bir kez sayar', () => {
+    const tekrarli = [{ category: 'Metin' }, { category: 'Metin' }, { category: 'Kod' }];
+    expect(uniqueCategories(tekrarli).sort()).toEqual(['Kod', 'Metin']);
+  });
+
+  it('boş listede boş dizi döndürür', () => {
+    expect(uniqueCategories([])).toEqual([]);
+  });
+});
+
+// --- Sınır ve hatalı tip senaryoları (Gün 6) ---
+
+describe('toolMatches — boş ve eksik girdiler', () => {
+  it('boş arama tüm araçları geçirir', () => {
+    araclar.forEach((arac) => expect(toolMatches(arac, { search: '' })).toBe(true));
+  });
+
+  it('filtre nesnesi verilmezse hepsi geçer', () => {
+    expect(toolMatches(araclar[0])).toBe(true);
+  });
+
+  // K2: alanlar şablon dizgisiyle birleştirilirken eksik alan "undefined"
+  // metnine dönüşüyordu; "undefined" araması eksik alanlı her aracı buluyordu.
+  it('eksik alanlar aramaya "undefined" olarak sızmaz', () => {
+    const eksik = { name: 'X' }; // category ve purpose yok
+    expect(toolMatches(eksik, { search: 'undefined' })).toBe(false);
+    expect(toolMatches(eksik, { search: 'null' })).toBe(false);
+  });
+
+  it('eksik alanlı araç kendi adıyla yine bulunur', () => {
+    expect(toolMatches({ name: 'Yalnız' }, { search: 'yalnız' })).toBe(true);
+  });
+
+  it('hiçbir alanı olmayan araç çökertmez', () => {
+    expect(() => toolMatches({}, { search: 'x' })).not.toThrow();
+    expect(toolMatches({}, { search: 'x' })).toBe(false);
+  });
+});
+
+
+describe('filterTools — sınırlar', () => {
+  it('boş listede boş dizi döndürür', () => {
+    expect(filterTools([], { search: 'x' })).toEqual([]);
+  });
+
+  it('hiçbiri eşleşmezse boş dizi döndürür', () => {
+    expect(filterTools(araclar, { search: 'kesinlikle-yok' })).toEqual([]);
+  });
+
+  it('girdi dizisini değiştirmez', () => {
+    const kopya = [...araclar];
+    filterTools(araclar, { category: 'Metin' });
+    expect(araclar).toEqual(kopya);
+  });
 });
