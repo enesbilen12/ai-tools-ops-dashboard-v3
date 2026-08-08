@@ -22,6 +22,7 @@ import { mountToolForm } from './toolForm.js';
 import { mountToolTable } from './toolTable.js';
 import { mountToolDrawer } from './toolDrawer.js';
 import { mountToast } from './toast.js';
+import { mountPagination } from './pagination.js';
 
 export function mountDashboard(kok) {
   kok.innerHTML = '';
@@ -79,6 +80,7 @@ export function mountDashboard(kok) {
   kok.appendChild(exportAlani);
 
   const tablo = mountToolTable(kok);
+  const sayfalama = mountPagination(kok); // ızgaranın hemen altında
 
   // Detay çekmecesi ve geri alma toast'ı: sayfa akışının dışında (sabit
   // konumlu) durdukları için yerleşimde nerede olduklarının önemi yok.
@@ -152,6 +154,7 @@ export function mountDashboard(kok) {
     filtreler.update(durum);
     aracFormu.update(durum);
     tablo.update(durum);
+    sayfalama.update(durum);
     cekmece.update(durum);
     toast.update(durum);
   }

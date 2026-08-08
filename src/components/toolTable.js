@@ -9,9 +9,10 @@
 
 import { DEFAULT_STATUS } from '../constants.js';
 import { escapeHtml } from '../utils/formatters.js';
-import { filterTools } from '../utils/filters.js';
+import { paginateTools } from '../utils/pagination.js';
 import {
   activeTools,
+  visibleTools,
   isFavorite,
   toggleFavorite,
   setEditing,
@@ -160,11 +161,15 @@ export function mountToolTable(kap) {
       }
 
       // 4) Araç var ama filtre hiçbirini geçirmedi (US-01).
-      const gosterilecek = filterTools(aktifler, durum.filters);
-      if (gosterilecek.length === 0) {
+      const eslesenler = visibleTools(); // filtrelenmiş + sıralanmış, sayfalanmamış
+      if (eslesenler.length === 0) {
         ana.innerHTML = '<p class="bos-sonuc">Araç bulunamadı.</p>';
         return;
       }
+
+      // 5) Yalnızca geçerli sayfanın kartları çizilir. paginateTools sayfa
+      // numarasını kendisi sınırlar; eskimiş bir sayfa boş ızgara üretmez.
+      const gosterilecek = paginateTools(eslesenler, durum.page, durum.pageSize);
 
       gosterilecek.forEach((arac) => {
         ana.appendChild(kartOlustur(arac, durum.saving));

@@ -41,9 +41,14 @@
 }
 
 /* --- Arama / filtre alanı --- */
+/* Beş kontrol alt alta dizilir; gap olmadan aralarındaki boşluk HTML'deki
+   satır sonlarından geliyordu ve eşit değildi. */
 .arama-alani {
   max-width: 900px;
   margin: 0 auto 24px; /* üst 0, ortala, alt 24px boşluk */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .arama-kutusu {
@@ -499,4 +504,36 @@ button:disabled {
 .toast-kapat {
   padding: 6px 9px;
   line-height: 1;
+}
+
+/* --- Sayfalama çubuğu ---
+   Kart ızgarasının altında; tek sayfaya sığan listelerde JS tarafından
+   [hidden] ile tamamen gizlenir. */
+.sayfalama {
+  max-width: 900px;
+  margin: 24px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.sayfalama[hidden] {
+  display: none; /* display:flex tarayıcının [hidden] kuralını ezdiği için */
+}
+
+.sayfa-btn {
+  cursor: pointer;
+  padding: 8px 14px;
+  font-size: 14px;
+  background-color: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.sayfa-bilgi {
+  font-size: 14px;
+  color: var(--muted);
+  text-align: center;
 }
