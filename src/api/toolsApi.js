@@ -9,8 +9,20 @@ import { TOOLS_ENDPOINT } from '../constants.js';
 // taraf 404 ile 500'ü ayırt edebilir (ör. 404'te listeyi tazelemek, 5xx'te
 // tekrar denemeyi önermek). Ağ hatası için status 0 kullanılır — HTTP yanıtı
 // hiç alınamadığı için gerçek bir durum kodu yoktur.
+//
+// İptal edilen istek (AbortController) status -1 ile ayrılır ve `aborted: true`
+// taşır: bu bir arıza değil, uygulamanın kendi kararıdır. Ayrılmazsa status 0'a
+// düşer ve kullanıcıya "json-server çalışıyor mu?" denirdi.
 export function normalizeError({ url = '', status = 0, cause } = {}) {
   let mesaj;
+  if (status === -1 || cause?.name === 'AbortError') {
+    const hata = new Error('İstek iptal edildi.');
+    hata.status = -1;
+    hata.url = url;
+    hata.aborted = true;
+    if (cause) hata.cause = cause;
+    return hata;
+  }
   if (status === 0) {
     // Tipik sebep: json-server çalışmıyor (npm run api unutulmuş).
     mesaj = "API'ye ulaşılamadı. json-server çalışıyor mu? (npm run api)";
@@ -50,8 +62,10 @@ async function istek(url, secenekler) {
 const JSON_BASLIK = { 'Content-Type': 'application/json' };
 
 // fetchTools: tüm araçları getirir (aktif + silinmiş; ayrım store'da yapılır).
-export function fetchTools() {
-  return istek(TOOLS_ENDPOINT);
+// signal: AbortController.signal — store, yeni bir yükleme başlatırken önceki
+// uçuşu iptal etmek için kullanır (geç dönen eski yanıt yeni listeyi ezmesin).
+export function fetchTools(signal) {
+  return istek(TOOLS_ENDPOINT, signal ? { signal } : undefined);
 }
 
 // createTool: yeni araç ekler. id'yi json-server üretir; deleted:false ile başlar.

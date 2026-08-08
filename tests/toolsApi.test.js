@@ -54,6 +54,21 @@ describe('normalizeError', () => {
   it('argümansız çağrıda ağ hatası varsayar', () => {
     expect(normalizeError().status).toBe(0);
   });
+
+  // İptal bir arıza değil, uygulamanın kendi kararı. Ayrılmazsa status 0'a
+  // düşer ve kullanıcıya "json-server çalışıyor mu?" denirdi.
+  it('iptal edilen isteği ağ hatasından ayırır', () => {
+    const iptal = new Error('The operation was aborted.');
+    iptal.name = 'AbortError';
+    const hata = normalizeError({ url: '/tools', status: 0, cause: iptal });
+    expect(hata.aborted).toBe(true);
+    expect(hata.status).toBe(-1);
+    expect(hata.message).not.toContain('npm run api');
+  });
+
+  it('status -1 ile de iptal olarak normalize eder', () => {
+    expect(normalizeError({ status: -1 }).aborted).toBe(true);
+  });
 });
 
 describe('fetchTools', () => {
@@ -78,6 +93,28 @@ describe('fetchTools', () => {
   it('HTTP hatasında durum kodunu taşır', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => yanit({ ok: false, status: 500 })));
     await expect(fetchTools()).rejects.toMatchObject({ status: 500 });
+  });
+
+  it('verilen signal fetch seçeneklerine geçer', async () => {
+    const sahte = vi.fn(async () => yanit({ govde: [] }));
+    vi.stubGlobal('fetch', sahte);
+
+    const kontrol = new AbortController();
+    await fetchTools(kontrol.signal);
+    expect(sahte).toHaveBeenCalledWith(TOOLS_ENDPOINT, { signal: kontrol.signal });
+  });
+
+  it('iptal edilen istek aborted:true ile reddeder', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => {
+      const iptal = new Error('The operation was aborted.');
+      iptal.name = 'AbortError';
+      throw iptal;
+    }));
+
+    await expect(fetchTools(new AbortController().signal)).rejects.toMatchObject({
+      aborted: true,
+      status: -1,
+    });
   });
 });
 
