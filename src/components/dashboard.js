@@ -41,7 +41,15 @@ export function mountDashboard(kok) {
   // --- Başlık ---
   const baslik = document.createElement('header');
   baslik.innerHTML = `
-    <h1>🤖 AI Araçları Paneli</h1>
+    <h1>
+      <!-- Dekoratif işaret: başlık metni zaten adı söylüyor, bu yüzden
+           aria-hidden. currentColor ile temayı, 1em ile başlık boyutunu izler. -->
+      <svg class="logo" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M12 2.5l1.9 5.3 5.3 1.9-5.3 1.9L12 16.9l-1.9-5.3-5.3-1.9 5.3-1.9L12 2.5z" />
+        <path d="M18.5 15l.85 2.35 2.35.85-2.35.85-.85 2.35-.85-2.35-2.35-.85 2.35-.85.85-2.35z" opacity=".55" />
+      </svg>
+      AI Araçları Paneli
+    </h1>
     <p>Yapay zeka araçlarını tek ekranda toplayan basit bir panel.</p>
     <button id="tema-btn" class="tema-btn" type="button">🌙 Koyu tema</button>
   `;

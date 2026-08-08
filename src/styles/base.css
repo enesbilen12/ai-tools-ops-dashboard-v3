@@ -3,10 +3,22 @@
 
 /* Açık tema (varsayılan): renkler değişken olarak tek merkezde tanımlı. */
 :root {
-  --bg: #f4f6f8;        /* sayfa arka planı */
+  /* Sayfa arka planı iki parçadır:
+     --bg   : SOLID ton. Girdi kutuları, kart butonları ve rozetler bunu
+              `background-color` ile kullanır ve o özellik gradyan kabul etmez.
+     --bg-* : gövdeye uygulanan gradyanın uçları (aşağıda `body`).
+     Gradyanın koyu ucu ÜSTTEDİR: başlık orada durur ve güçlü metin renklerini
+     kullanır; en zayıf renk olan --footer ise sayfanın altında, açık uçta kalır. */
+  --bg: #eef3fa;        /* solid ton (mavi tarafa hafifçe çekildi) */
+  --bg-ust: #d8e7f8;    /* gradyanın üst ucu — daha koyu mavi */
+  --bg-alt: #eef4fd;    /* gradyanın alt ucu — açık mavi */
+
   --text: #181818;      /* ana yazı rengi */
   --muted: #555;        /* soluk yazı (alt başlık) */
-  --footer: #777;       /* footer / boş sonuç yazısı */
+  /* Gradyanın en koyu ucunda da okunur kalsın diye #777'den koyulaştırıldı
+     ve hafifçe maviye çekildi: #d8e7f8 üzerinde 4.74:1 (eskisi 3.56:1 kalırdı,
+     düz zeminde bile 4.13:1 ile sınırdaydı). */
+  --footer: #5d6470;    /* footer / boş sonuç yazısı */
   --card-bg: #ffffff;   /* kart ve giriş kutusu arka planı */
   --border: #e0e0e0;    /* kenarlıklar */
   --danger: #c0392b;    /* silme butonu ve hata mesajı */
@@ -21,10 +33,12 @@
 
 /* Koyu tema: <html data-theme="dark"> olunca bu değerler devreye girer. */
 [data-theme='dark'] {
-  --bg: #1a1a1a;
+  --bg: #16203a;        /* solid ton — koyu mavi */
+  --bg-ust: #101d33;    /* gradyanın üst ucu */
+  --bg-alt: #182741;    /* gradyanın alt ucu */
   --text: #f0f0f0;
   --muted: #b0b0b0;
-  --footer: #9a9a9a;
+  --footer: #9a9a9a;    /* koyu mavi zeminde 5.31–5.99:1, dokunmaya gerek yok */
   --card-bg: #2a2a2a;
   --border: #444444;
   --danger: #ff7b6b; /* koyu zeminde okunur kalsın */
@@ -35,10 +49,21 @@
 /* Tüm sayfa için temel ayarlar */
 body {
   font-family: Arial, Helvetica, sans-serif;
-  background-color: var(--bg);
   color: var(--text);
   margin: 0;
   padding: 24px;
+
+  /* Gradyan yalnızca burada; solid --bg diğer öğelerde kullanılmaya devam eder.
+     background-color yedek olarak durur: gradyan desteklenmezse ya da resim
+     yüklenmeden önce sayfa beyaz kalmasın.
+     min-height + fixed: içerik kısa olduğunda gradyan ekranın altında kesilip
+     beyaz bir bant bırakmasın. */
+  background-color: var(--bg);
+  background-image: linear-gradient(180deg, var(--bg-ust) 0%, var(--bg-alt) 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  box-sizing: border-box;
+
   transition: background-color 0.2s, color 0.2s; /* tema geçişi yumuşasın */
 }
 
@@ -50,6 +75,22 @@ header {
 
 header h1 {
   margin-bottom: 4px;
+  /* SVG ile metni aynı satırda ve ortak taban çizgisinde tutar. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Başlıktaki işaret: emoji yerine ölçeklenebilir bir SVG.
+   1em ile başlığın yazı boyutunu, currentColor ile de tema rengini izler —
+   koyu temaya geçince ayrıca bir kural gerekmez. */
+.logo {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0; /* dar ekranda başlık sarınca ikon ezilmesin */
+  fill: currentColor;
+  color: var(--seri); /* dağılım çubuklarıyla aynı, doğrulanmış mavi */
 }
 
 header p {
