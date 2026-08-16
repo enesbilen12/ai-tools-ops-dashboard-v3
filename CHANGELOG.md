@@ -1,10 +1,34 @@
 # Değişiklik Günlüğü
 
-## Yayınlanmamış — 2026-08-08 (Gün 6)
+## v3.0.0 — 2026-08-16
+
+Panelin v2'den (tek dosyalık, 887 satırlık `app.js`) modüler bir yapıya taşınması
+ve altı günlük sprint boyunca yeniden inşası. Etiket: [`v3.0.0`](../../releases/tag/v3.0.0)
+
+**Özet**
+
+- **Mimari:** 9 bileşen, tek doğruluk kaynağı olan bir store, REST katmanı ve
+  12 saf yardımcı modül. Bileşenler API'yi doğrudan çağırmaz.
+- **Veri:** `localStorage` → **json-server** (`db.json`). Silme yumuşak; uygulama
+  hiçbir zaman `DELETE` göndermez. Tarayıcıda yalnızca tema ve favoriler kalır.
+- **Özellikler:** arama (300 ms debounce) · kategori/durum filtresi · sıralama
+  (Türkçe harf sırası) · sayfalama · tek formda ekleme/düzenleme · detay çekmecesi ·
+  geri alınabilir silme · dört ayrı boş durum · iptal edilebilir yükleme ·
+  filtrelenmiş CSV/JSON dışa aktarma · doğrulamalı JSON içe aktarma ·
+  adres çubuğu senkronu · istatistikler ve kategori dağılımı · açık/koyu tema.
+- **Kalite:** 167 birim testi (11 dosya), 152 kontrollük 6 tarayıcısız duman testi,
+  10 belge. Yol boyunca **7 kusur** bulunup düzeltildi (aşağıdaki "Düzeltildi"
+  bölümlerinde).
+
+Aşağıdaki bölümler bu sürümün gün gün nasıl oluştuğunu gösterir; en yeni gün üstte.
+
+---
+
+### Gün 6 — 2026-08-08 · Test boşlukları, kod incelemesi ve README
 
 Gün 6: test boşluklarının kapatılması, kod incelemesi ve README.
 
-### Düzeltildi
+#### Düzeltildi
 - **Türkçe İ/ı benzersizlik kontrolünü ve aramayı bozuyordu.** JavaScript'in
   `toLowerCase()`'i `"İzleme"` için `"i̇zleme"` (i + birleşen nokta) üretiyor;
   bu yüzden "İzleme" ve "izleme" **iki ayrı araç olarak eklenebiliyordu** ve
@@ -22,7 +46,7 @@ Gün 6: test boşluklarının kapatılması, kod incelemesi ve README.
   yükleyen kullanıcı favorisini sessizce kaybediyordu. Bilgi artık kaydın ömrü
   boyunca saklanıyor ve iki geri yükleme yolu aynı sonucu veriyor.
 
-### Eklendi
+#### Eklendi
 - **`utils/text.js`** — Türkçeye uygun karşılaştırma (`esitMetin`, `icerirMetin`).
 - **49 yeni test** (118 → 167): boş değer, sınır değer, Türkçe karakter ve hatalı
   tip senaryoları; `validators`, `filters`, `csv`, `sorting`, `pagination`.
@@ -31,11 +55,11 @@ Gün 6: test boşluklarının kapatılması, kod incelemesi ve README.
 - **`REVIEW.md`** — kod incelemesi: düzeltilen kusurlar, bilinen riskler
   (erişilebilirlik, CSV/Excel, yeniden giriş) ve refactor önerileri.
 
-## Yayınlanmamış — 2026-08-08 (Gün 5)
+### Gün 5 — 2026-08-08 · İstatistikler, dışa/içe aktarma, iptal edilebilir yükleme
 
 Gün 5: istatistikler, dışa/içe aktarma ve iptal edilebilir yükleme.
 
-### Eklendi
+#### Eklendi
 - **Panel istatistikleri** — dört sayı (Toplam Araç, Durumu Aktif, Favoriler,
   Kategori) ve **kategori dağılımı** çubukları. Dağılım tek serilik bir büyüklük
   karşılaştırması olduğu için tek hue kullanılır; her kategoriye ayrı renk vermek
@@ -56,7 +80,7 @@ Gün 5: istatistikler, dışa/içe aktarma ve iptal edilebilir yükleme.
 - **US-15 / US-16 / US-17** (`USER_STORIES.md`) — istatistikler, içe aktarma,
   iptal edilebilir yükleme.
 
-### Değişti
+#### Değişti
 - **Dışa aktarma artık filtreyi uyguluyor.** CSV tüm aktif araçları veriyordu;
   şimdi ikisi de `visibleTools()` kullanıyor — filtreden geçen tüm kayıtlar,
   sayfalanmadan. Düğme etiketinde kaç kaydın ineceği yazıyor (`📤 CSV (47)`).
@@ -66,17 +90,17 @@ Gün 5: istatistikler, dışa/içe aktarma ve iptal edilebilir yükleme.
 - Özet alanı `dashboard.js` içinden `components/stats.js`'e taşındı.
 - `downloadCSV`'nin blob/anchor mantığı `downloadFile` olarak ortaklaştırıldı.
 
-### Düzeltildi
+#### Düzeltildi
 - **İptal edilen istek artık sunucu arızası gibi görünmüyor.** `AbortError`
   `normalizeError`'da `status: 0`'a düşüp "API'ye ulaşılamadı. json-server
   çalışıyor mu?" mesajını üretiyordu — oysa iptali uygulamanın kendisi istemişti.
   Artık `status: -1` + `aborted: true` ile ayrılıyor ve durumu hiç değiştirmiyor.
 
-## Yayınlanmamış — 2026-08-08 (Gün 4)
+### Gün 4 — 2026-08-08 · Sıralama, sayfalama ve URL durumu
 
 Gün 4: sıralama, sayfalama ve adres çubuğunda saklanan görünüm.
 
-### Eklendi
+#### Eklendi
 - **Sıralama menüsü** — Ad (A→Z / Z→A), Kategori, Durum. Karşılaştırmalar Türkçe
   harf sırasına göre (`localeCompare(…, 'tr')`); aksi hâlde `Çizim`/`Şema`/`İzleme`
   yanlış yere düşüyordu. Eşit kayıtlar ada göre ikincil sıralanır.
@@ -96,7 +120,7 @@ Gün 4: sıralama, sayfalama ve adres çubuğunda saklanan görünüm.
   sıfırlama kuralları ve URL senkronunun iki yönü.
 - **US-12 / US-13 / US-14** (`USER_STORIES.md`) — sıralama, sayfalama, URL kalıcılığı.
 
-### Değişti
+#### Değişti
 - `setFilter` / `resetFilters` / `setSort` sayfayı **1'e döndürür**; daralan sonuçta
   kullanıcı liste dışı bir sayfada kalmasın.
 - `setFilter` aynı değer yeniden atandığında hiçbir şey yapmaz — gereksiz yeniden
@@ -108,11 +132,11 @@ Gün 4: sıralama, sayfalama ve adres çubuğunda saklanan görünüm.
 - Filtre alanı `flex` sütuna alındı: beş kontrolün arası HTML satır sonlarından gelen
   düzensiz boşluklar yerine eşit `gap` ile ayrılıyor.
 
-## Yayınlanmamış — 2026-08-04
+### Gün 3 — 2026-08-04 · Tam CRUD, tek form ve detay çekmecesi
 
 Gün 3: tam CRUD, tek form ve geri alınabilir silme.
 
-### Eklendi
+#### Eklendi
 - **Detay çekmecesi** (`src/components/toolDrawer.js`) — kart gövdesine tıklayınca
   sağdan açılır; aracın sekiz alanı, kartta görünmeyen `id`'si ve favori durumu
   burada. Salt-okunur; `×`, karartma ve `Esc` ile kapanır, odak geldiği karta döner.
@@ -126,7 +150,7 @@ Gün 3: tam CRUD, tek form ve geri alınabilir silme.
   `undoDelete` / `clearUndo` / `findTool` aksiyonları.
 - **US-11** (`USER_STORIES.md`) — detay çekmecesi hikayesi ve kabul kriterleri.
 
-### Değişti
+#### Değişti
 - **Ekleme ve düzenleme tek formda birleşti.** Düzenleme formu kartın içinde
   açılıyordu; aynı 8 alan iki yerde tekrar ediyordu. Artık sayfanın üstündeki tek
   form `editingId`'ye göre POST veya PATCH yapıyor. `editFormHtml`, `readEditForm`
@@ -136,18 +160,18 @@ Gün 3: tam CRUD, tek form ve geri alınabilir silme.
 - Store'daki `editingName` → **`editingId`**: yeniden adlandırma sırasında referans
   ada bağlı kalmasın diye.
 
-### Düzeltildi
+#### Düzeltildi
 - **Düzenlemede "bu ad zaten var" kilidi.** `validateForm` benzersizlik kontrolünü
   `t.id !== currentId` ile, yani katı karşılaştırmayla yapıyordu. `currentId` DOM'dan
   metin (`"5"`), `db.json` id'leri sayı (`5`) geldiği için araç kendi adına çarpıyor
   ve düzenleme kaydedilemiyordu. Karşılaştırma metin üzerinden yapılıyor; iki
   regresyon testi eklendi (32 → 34).
 
-## Yayınlanmamış — 2026-08-03
+### Gün 2 — 2026-08-03 · API katmanı ve yükleme/hata durumları
 
 Gün 2: API katmanının sertleştirilmesi ve yükleme/hata durumlarının ayrıştırılması.
 
-### Eklendi
+#### Eklendi
 - **`normalizeError`** (`src/api/toolsApi.js`) — dışa aktarılmış, test edilebilir
   hata normalleştirme. Fırlatılan `Error` artık `status` ve `url` da taşıyor;
   ağ hatası (`status: 0`), 404, 4xx ve 5xx için ayrı mesajlar üretiliyor.
@@ -161,7 +185,7 @@ Gün 2: API katmanının sertleştirilmesi ve yükleme/hata durumlarının ayrı
   hata biçimi ve `id`'nin metin olarak döndüğü uyarısı.
 - Hata şeridine **kapatma (×) düğmesi** (`clearError`).
 
-### Değişti
+#### Değişti
 - **Boş durum dörde ayrıldı.** Önceden dört ayrı durum tek bir "Araç bulunamadı."
   mesajına iniyordu (yükleniyor / API kapalı / veri yok / filtre boş). Artık:
   "Yükleniyor…", hata + Tekrar dene, "Henüz araç eklenmemiş.", "Araç bulunamadı."
@@ -169,11 +193,11 @@ Gün 2: API katmanının sertleştirilmesi ve yükleme/hata durumlarının ayrı
   **aksiyon** hatası üstteki kapatılabilir şeritte. Aynı mesaj iki yerde çıkmıyor.
 - Durum şeridi `:empty` yerine `hidden` özniteliğiyle gizleniyor (içine düğme girdi).
 
-## v3.0.0 — 2026-08-02
+### Gün 1 — 2026-08-02 · v2 migration
 
 v2'nin (tek dosyalık, 887 satırlık `app.js`) modüler Vite yapısına taşınması.
 
-### Eklendi
+#### Eklendi
 - **Vite** derleme zinciri (`npm run dev` / `build` / `preview`) ve **vitest** ile
   18 birim testi (`tests/filters`, `tests/validators`, `tests/csv`).
 - **json-server** kalıcılığı: araçlar artık `db.json` içinde, `npm run api` ile servis edilir.
@@ -183,7 +207,7 @@ v2'nin (tek dosyalık, 887 satırlık `app.js`) modüler Vite yapısına taşın
   eskiden bu durumda konsola bir uyarı düşüyordu.
 - Stiller üçe ayrıldı: `styles/base.css`, `styles/components.css`, `styles/responsive.css`.
 
-### Değişti
+#### Değişti
 - **Dışa aktarma:** sayfa içi salt-okunur JSON textarea yerine **CSV dosya indirme**
   (RFC 4180 kaçışlı). Bkz. US-09.
 - **Kalıcılık:** araçlar ve çöp kutusu `localStorage`'dan `db.json`'a taşındı.
@@ -193,12 +217,12 @@ v2'nin (tek dosyalık, 887 satırlık `app.js`) modüler Vite yapısına taşın
 - Yeniden çizim kısmileştirildi: yalnızca değişen parçalar güncelleniyor
   (arama kutusu odağı korunsun diye).
 
-### Kaldırıldı
+#### Kaldırıldı
 - `app.js` içindeki 18 kayıtlık `VARSAYILAN_ARACLAR` kopyası — tek kaynak artık `db.json`.
 - `fetch("data.json")` ile açılış yüklemesi ve varsayılan/kayıtlı veri birleştirme mantığı.
 - Vite şablon artıkları (`counter.js`, `style.css`, `assets/*`, `public/icons.svg`).
 
-### Korundu (v2 ile aynı)
+#### Korundu (v2 ile aynı)
 - Tüm sınıf adları ve görsel tasarım; `[data-theme="dark"]` ile tema geçişi.
 - Kart içi (inline) düzenleme formu — ayrı bir yan çekmece kullanılmadı.
 - Silme onayı için `confirm()`, geri yükleme çakışmasında `alert()`.
