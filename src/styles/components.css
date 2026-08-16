@@ -1,0 +1,730 @@
+/* components.css: Tek tek bileşenlerin görünümü.
+   (v2 style.css'in gövdesinden taşındı; sınıf adları birebir korundu.) */
+
+/* --- Tema butonu --- */
+.tema-btn {
+  margin-top: 12px;
+  padding: 8px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  background-color: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+/* --- Özet alanı: sayı kutuları satırı + altında kategori dağılımı --- */
+.ozet-alani {
+  max-width: 900px;
+  margin: 0 auto 16px;
+  display: flex;
+  flex-direction: column; /* kutular üstte, dağılım altta */
+  gap: 12px;
+}
+
+.ozet-kutu {
+  flex: 1;
+  text-align: center;
+  padding: 12px;
+  font-size: 14px;
+  color: var(--muted);
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+/* Kutu içindeki sayı: büyük ve belirgin */
+.ozet-kutu strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 22px;
+  color: var(--text);
+}
+
+/* --- Arama / filtre alanı --- */
+/* Beş kontrol alt alta dizilir; gap olmadan aralarındaki boşluk HTML'deki
+   satır sonlarından geliyordu ve eşit değildi. */
+.arama-alani {
+  max-width: 900px;
+  margin: 0 auto 24px; /* üst 0, ortala, alt 24px boşluk */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.arama-kutusu {
+  width: 100%;
+  box-sizing: border-box; /* padding genişliği taşırmasın */
+  padding: 12px 16px;
+  font-size: 16px;
+  background-color: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color 0.2s, box-shadow 0.2s; /* durum değişimi yumuşasın */
+}
+
+/* Fare üzerine gelince: kenarlık hafifçe koyulaşır (tıklanabilir ipucu). */
+.arama-kutusu:hover {
+  border-color: #b0b0b0;
+}
+
+/* Kutu seçiliyken (tıklama/Tab): belirgin mavi kenarlık + hafif parıltı. */
+.arama-kutusu:focus {
+  outline: none; /* tarayıcının varsayılan çerçevesini kaldırıp kendimiz veriyoruz */
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+/* --- Yeni araç ekleme alanı: buton + açılır form --- */
+.ekle-alani {
+  max-width: 900px;
+  margin: 0 auto 24px;
+}
+
+.ekle-ac-btn {
+  cursor: pointer;
+  padding: 10px 16px;
+  font-size: 14px;
+  background-color: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.ekle-form {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+/* Gizli durum: form kapalıyken görünmez */
+.ekle-form.gizli {
+  display: none;
+}
+
+.ekle-alan {
+  padding: 10px 12px;
+  font-size: 14px;
+  background-color: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.ekle-aksiyonlar {
+  display: flex;
+  gap: 8px;
+}
+
+.ekle-btn,
+.ekle-iptal-btn {
+  cursor: pointer;
+  padding: 8px 14px;
+  font-size: 14px;
+  background-color: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+/* --- Dışa aktarma alanı --- */
+.export-alani {
+  max-width: 900px;
+  margin: 0 auto 24px;
+}
+
+/* --- Kart ızgarası ---
+   Masaüstünde kartlar yan yana, dar ekranda otomatik alt alta gelir. */
+main {
+  max-width: 900px;
+  margin: 0 auto; /* tüm ızgarayı sayfada ortala */
+  display: grid;
+  gap: 16px; /* kartlar arası boşluk */
+  /* "Sığdığı kadar sütun aç, her sütun en az 250px olsun."
+     Ekran daralınca tek sütuna düşer -> kartlar alt alta dizilir. */
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+/* Tek tek araç kartlarının görünümü */
+.kart {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+/* Abonelik / durum rozeti: küçük ve sade bir etiket (fazla yer kaplamaz) */
+.abonelik {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  border-radius: 10px;
+  color: var(--muted);
+  background-color: var(--bg);
+  border: 1px solid var(--border);
+}
+
+/* Kart alt aksiyonları: Düzenle / Sil butonları */
+.kart-aksiyonlar {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.kart-aksiyonlar button,
+.duzenle-aksiyonlar button {
+  cursor: pointer;
+  padding: 6px 10px;
+  font-size: 13px;
+  background-color: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+/* Sil butonu tehlikeli işlem olduğu için kırmızımsı yazı */
+.sil-btn {
+  color: var(--danger);
+}
+
+/* "Siteye Git" bağlantısı: bir <a> ama diğer butonlarla aynı görünüm */
+.site-btn {
+  text-decoration: none;
+  cursor: pointer;
+  padding: 6px 10px;
+  font-size: 13px;
+  background-color: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+/* Favori yıldızı: kartın kendi akışında sade bir buton */
+.favori-btn {
+  cursor: pointer;
+  padding: 2px 8px;
+  font-size: 16px;
+  background: none;
+  color: var(--muted);
+  border: none;
+}
+
+.favori-btn.aktif {
+  color: #f5b301; /* işaretliyken belirgin sarı yıldız */
+}
+
+/* --- Kart içi düzenleme formu --- */
+.duzenle-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.duzenle-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.duzenle-alan {
+  padding: 6px 8px;
+  font-size: 14px;
+  background-color: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.duzenle-aksiyonlar {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* Boş durum mesajı (yükleniyor / hata / veri yok / sonuç yok):
+   tüm genişliğe yayılır ve ortalanır. */
+.bos-sonuc {
+  grid-column: 1 / -1; /* grid'in tüm sütunlarını kapla */
+  text-align: center;
+  color: var(--footer);
+}
+
+/* Yükleme başarısız olduğunda çıkan "Tekrar dene" butonu */
+.tekrar-btn {
+  cursor: pointer;
+  margin-top: 8px;
+  padding: 8px 14px;
+  font-size: 14px;
+  background-color: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+/* --- Sağ üst köşe: silinen araçlar menüsü --- */
+.silinen-alani {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  text-align: right;
+}
+
+.silinen-btn {
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 13px;
+  background-color: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+/* Açılır liste paneli */
+.silinen-liste {
+  margin-top: 6px;
+  min-width: 180px;
+  max-height: 260px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+/* Gizli durum: panel kapalıyken görünmez */
+.silinen-liste.gizli {
+  display: none;
+}
+
+/* Silinen araç öğesi (tıklanınca geri yüklenir) */
+.silinen-oge {
+  cursor: pointer;
+  text-align: left;
+  padding: 6px 8px;
+  font-size: 13px;
+  background-color: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.silinen-bos {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* --- Form başlığı: tek form iki modda çalıştığı için mod buradan okunur --- */
+.form-baslik {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+/* --- Tıklanabilir kart ---
+   Kart gövdesine tıklamak detay çekmecesini açar; bunun görsel ipucu. */
+.kart {
+  cursor: pointer;
+}
+
+.kart:hover {
+  border-color: #b0b0b0;
+}
+
+.kart:focus-visible {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+/* --- İstek sürerken kilitlenen butonlar ---
+   Tek kural tüm butonları kapsar; her bileşende tekrar yazılmasın. */
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* --- Detay çekmecesi (drawer) --- */
+
+/* Arkadaki karartma: çekmece açıkken sayfanın geri kalanını geri plana atar
+   ve tıklanınca çekmeceyi kapatır. */
+.drawer-perde {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 21; /* perdenin üstünde */
+  width: 420px;
+  max-width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  padding: 20px;
+  background-color: var(--card-bg);
+  color: var(--text);
+  border-left: 1px solid var(--border);
+}
+
+/* Başlık satırı: ad solda, kapatma düğmesi sağda */
+.drawer-ust {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.drawer-ust h2 {
+  flex: 1;
+  margin: 0;
+  font-size: 20px;
+}
+
+.drawer-kapat {
+  cursor: pointer;
+  padding: 0 6px;
+  font-size: 22px;
+  line-height: 1;
+  background: none;
+  color: var(--text);
+  border: none;
+}
+
+.drawer-rozetler {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 16px;
+}
+
+/* Alan listesi: etiket üstte soluk, değer altta */
+.drawer-alanlar {
+  margin: 0;
+}
+
+.drawer-satir {
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+
+.drawer-satir dt {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.drawer-satir dd {
+  margin: 2px 0 0;
+  font-size: 14px;
+  word-break: break-word; /* uzun URL çekmeceyi taşırmasın */
+}
+
+/* Değeri boş olan alan: çizgi ile gösterilir, satır atlanmaz */
+.drawer-bos {
+  color: var(--footer);
+}
+
+.drawer-aksiyonlar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.drawer-aksiyonlar button {
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 14px;
+  background-color: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.drawer-sil-btn {
+  color: var(--danger);
+}
+
+/* --- Geri alma toast'ı --- */
+
+/* Sayfanın altında ortalanmış şerit. Çekmecenin de üstünde durur ki
+   çekmeceden silindiğinde görünür kalsın. */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: calc(100% - 32px);
+  padding: 12px 16px;
+  font-size: 14px;
+  background-color: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+}
+
+.toast[hidden] {
+  display: none; /* display:flex tarayıcının [hidden] kuralını ezdiği için */
+}
+
+.toast-hata {
+  color: var(--danger);
+}
+
+.toast-geri-btn,
+.toast-kapat {
+  cursor: pointer;
+  padding: 6px 10px;
+  font-size: 14px;
+  background-color: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.toast-kapat {
+  padding: 6px 9px;
+  line-height: 1;
+}
+
+/* --- Sayfalama çubuğu ---
+   Kart ızgarasının altında; tek sayfaya sığan listelerde JS tarafından
+   [hidden] ile tamamen gizlenir. */
+.sayfalama {
+  max-width: 900px;
+  margin: 24px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.sayfalama[hidden] {
+  display: none; /* display:flex tarayıcının [hidden] kuralını ezdiği için */
+}
+
+.sayfa-btn {
+  cursor: pointer;
+  padding: 8px 14px;
+  font-size: 14px;
+  background-color: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.sayfa-bilgi {
+  font-size: 14px;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* --- Özet alanı: KPI kutuları + kategori dağılımı --- */
+
+/* Dört sayı kutusu yan yana; dar ekranda alta sarar. */
+.ozet-kutular {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* --- Kategori dağılımı (yatay çubuk) ---
+   Tek serilik bir büyüklük karşılaştırması: TEK hue kullanılır. Kategori adı
+   doğrudan yazılı ve sayı da metin olarak duruyor; her kategoriye ayrı renk
+   vermek hiçbir şey kodlamaz, yalnızca süs olurdu.
+
+   Renk değişkenleri diğer tema renkleriyle birlikte base.css'te tanımlı. */
+
+.dagilim {
+  margin-top: 12px;
+  padding: 16px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+/* Başlık tek seriyi adlandırır; bu yüzden ayrıca gösterge (legend) yok. */
+.dagilim-baslik {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: normal;
+  color: var(--muted);
+}
+
+.dagilim-satir {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  /* Çubuklar arasında 2px zemin boşluğu kalsın diye satır aralığı. */
+  padding: 3px 0;
+}
+
+.dagilim-ad {
+  font-size: 13px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Yuva: ölçeğin tamamını gösterir, geri planda kalır. */
+.dagilim-yuva {
+  display: block;
+  height: 10px;
+  background-color: var(--seri-yuva);
+  border-radius: 5px;
+}
+
+/* Veri ucu 4px yuvarlatılır, taban çizgisine (solda) yapışık kalır. */
+.dagilim-cubuk {
+  display: block;
+  height: 100%;
+  min-width: 4px;
+  background-color: var(--seri);
+  border-radius: 0 4px 4px 0;
+}
+
+/* Sayı ve oran metin belirteciyle yazılır, seri rengiyle değil: rengi taşıyan
+   tek şey çubuk olsun. */
+.dagilim-sayi {
+  font-size: 13px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.dagilim-oran {
+  color: var(--muted);
+}
+
+.dagilim-bos {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* --- Veri aktarım düğmeleri --- */
+.export-alani {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* --- İçe aktarma paneli --- */
+.import-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 21; /* perdenin üstünde */
+  width: 560px;
+  max-width: calc(100% - 32px);
+  max-height: calc(100% - 64px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 20px;
+  background-color: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.import-ust {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.import-ust h2 {
+  flex: 1;
+  margin: 0;
+  font-size: 18px;
+}
+
+.import-kapat {
+  cursor: pointer;
+  padding: 0 6px;
+  font-size: 22px;
+  line-height: 1;
+  background: none;
+  color: var(--text);
+  border: none;
+}
+
+.import-bolum {
+  margin-top: 16px;
+}
+
+.import-bolum h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+/* Uzun listeler paneli taşırmasın; kendi içinde kaysın. */
+.import-liste {
+  margin: 0;
+  padding-left: 18px;
+  max-height: 180px;
+  overflow-y: auto;
+  font-size: 13px;
+}
+
+.import-liste li {
+  margin-bottom: 4px;
+}
+
+.import-gecersiz li {
+  color: var(--danger);
+}
+
+.import-soluk {
+  color: var(--muted);
+}
+
+.import-hata {
+  margin: 16px 0 0;
+  color: var(--danger);
+}
+
+.import-ipucu,
+.import-sonuc {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.import-aksiyonlar {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.import-aksiyonlar button {
+  cursor: pointer;
+  padding: 8px 14px;
+  font-size: 14px;
+  background-color: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}

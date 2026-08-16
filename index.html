@@ -1,13 +1,24 @@
 <!doctype html>
-<html lang="en">
+<!-- index.html: Vite giriş noktası. Sayfanın tüm gövdesini bileşenler üretir. -->
+<html lang="tr">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ai-tools-ops-dashboard-v3</title>
+    <title>AI Araçları Paneli</title>
   </head>
   <body>
-    <div id="app"></div>
+    <!-- dashboard bileşeni bu kabın içini doldurur.
+         İçindeki iskelet, JS inene kadar geçen sürede ekranın bomboş kalmaması
+         içindir; mountDashboard ilk işi olarak kabı temizleyip üzerine yazar.
+         Stil satır içi verilir: dev sunucusunda CSS de JS ile enjekte edildiği
+         için ilk boyamada .bos-sonuc kuralı henüz yüklenmiş olmaz. -->
+    <div id="app">
+      <p style="margin-top: 80px; font-family: Arial, Helvetica, sans-serif;
+                text-align: center; color: #777;">
+        Yükleniyor…
+      </p>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
